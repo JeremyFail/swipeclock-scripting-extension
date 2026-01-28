@@ -1,7 +1,7 @@
 {
   "name": "swipeclock-scripting",
   "displayName": "Swipeclock Scripting Language",
-  "description": "Syntax highlighting and IntelliSense support for Swipeclock scripting language",
+  "description": "Syntax highlighting, IntelliSense, formatting, and diagnostics support for Swipeclock's Scripting Language",
   "publisher": "JeremyFail",
   "repository": {
     "type": "git",

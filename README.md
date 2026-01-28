@@ -46,16 +46,16 @@ For documentation on how to write scripts, check the [Swipeclock Knowledge Base]
 
 ## Installation
 
-1. Open VS Code
-2. Press `F5` to open a new Extension Development Host window
-3. In the new window, open a `.twp`, `.swipeclock`, `.wfhscript`, or other supported file
-4. The extension will automatically activate
+1. Install the extension into VS Code.
+2. Open a `.scscript`, `.swipeclock`, or other supported file
+3. The extension should automatically activate
 
-Alternatively, to package and install:
+Alternatively, to package and install manually:
 
-1. Run `npm install` to install dependencies
-2. Run `npm run compile` to compile TypeScript
-3. Press `F5` to test, or use `vsce package` to create a `.vsix` file for distribution
+1. Clone the repository.
+2. Run `npm install` to install dependencies
+3. Run `npm run compile` to compile TypeScript
+4. Press `F5` to test, or use `vsce package` to create a `.vsix` file for distribution
 
 ## Usage
 
@@ -85,7 +85,7 @@ A **document formatter** is included. Use **Format Document** (e.g. `Alt+Shift+F
 - **Default style**: Uses VS Code's editor indentation settings (tab size, spaces vs tabs). Falls back to 4 spaces if not set. JavaScript-style braces (opening `{` on the same line as `if` / `else if` / `else`).
 - **Customization**: You can change formatter behavior in Settings:
   - **Swipeclock Scripting: Indent Size** (`swipeclock.formatting.indentSize`) – number of spaces when using spaces (default: 4, used as fallback only).
-  - **Swipeclock Scripting: Brace Style** (`swipeclock.formatting.braceStyle`) – `javascript` (brace on same line) or `allman` (brace on new line).
+  - **Swipeclock Scripting: Brace Style** (`swipeclock.formatting.braceStyle`) – `javascript` (brace on same line - default) or `allman` (brace on new line).
 - The formatter respects your editor's **Insert Spaces** / **Tab Size** settings. You can also choose a different default formatter for Swipeclock files in VS Code settings if you prefer.
 
 ### Hover Documentation
@@ -192,9 +192,7 @@ The extension provides commands to set up AI configuration files in your workspa
 
 ### Alternative: Disable AI Suggestions
 
-If you prefer to disable AI suggestions entirely for Swipeclock files, you can:
-- Use the `.cursorignore` file (excludes files from Cursor indexing)
-- Configure workspace settings to disable Copilot/Cursor AI for Swipeclock files
+If you prefer to disable AI suggestions entirely for Swipeclock files, you can configure your workspace settings to disable Copilot/Cursor AI for Swipeclock files.
 
 ## Maintaining the Extension: Adding New Properties or Functions
 
@@ -214,11 +212,8 @@ Completion, hover docs, and diagnostics all read from the completion provider. N
 
 - Dynamic properties (department1-9, etc.) are suggested but actual availability depends on account configuration
 - Some edge cases in syntax highlighting may not be perfect due to the flexible nature of the language
-- The formatter uses VS Code's editor indentation settings; if those aren't available, it falls back to the extension's indent size setting or 4 spaces
 
-## Contributing
-
-This extension is designed specifically for Swipeclock scripting. If you find issues or have suggestions, please report them on the [GitHub repository](https://github.com/JeremyFail/swipeclock-scripting-extension).
+If you find issues or have suggestions, please report them on the [GitHub repository](https://github.com/JeremyFail/swipeclock-scripting-extension).
 
 ## License
 

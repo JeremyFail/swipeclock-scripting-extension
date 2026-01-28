@@ -1,0 +1,8 @@
+{
+  // Language-specific settings
+  "[swipeclock]": {
+    "editor.suggest.showKeywords": true,
+    "editor.suggest.showSnippets": true,
+    "editor.wordBasedSuggestions": "off"
+  }
+}

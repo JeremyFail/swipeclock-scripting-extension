@@ -1,0 +1,204 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Swipeclock Scripting",
+  "scopeName": "source.swipeclock",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#object-properties"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#time-literals"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#boolean-literals"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash",
+          "begin": "//",
+          "end": "$",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment"
+            }
+          },
+          "patterns": []
+        },
+        {
+          "name": "comment.block",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.begin"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.end"
+            }
+          },
+          "patterns": []
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "time-literals": {
+      "patterns": [
+        {
+          "name": "constant.numeric",
+          "match": "\\b(?:\\d{1,2}:\\d{2}(?::\\d{2})?(?:am|pm|AM|PM)?|\\d{1,2}:\\d{2}(?::\\d{2})?)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.logical",
+          "match": "(?i)\\b(and|or|&&|\\|\\|)\\b"
+        },
+        {
+          "name": "keyword.operator.comparison",
+          "match": "(==|!=|<>|<=|>=|<|>)"
+        },
+        {
+          "name": "keyword.operator.arithmetic",
+          "match": "(?i)(\\+|\\-|\\*|/|\\\\|%|mod)\\b"
+        },
+        {
+          "name": "keyword.operator.assignment",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator",
+          "match": "(?i)\\b(contains|startswith|endswith)\\b"
+        },
+        {
+          "name": "punctuation.accessor",
+          "match": "\\."
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control",
+          "match": "(?i)\\b(if|else if|else)\\b"
+        }
+      ]
+    },
+    "object-properties": {
+      "patterns": [
+        {
+          "name": "variable.other.property",
+          "match": "(?i)\\b(employee|reportingdate)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": {
+              "name": "storage.type"
+            },
+            "2": {
+              "name": "variable.other.property"
+            }
+          }
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function",
+          "match": "(?i)\\b(dateadd|dateserial|weekday|cdate|cdatetime|ctime|day|month|year|val|cint|cstr|abs|translate|within|left|right|mid|round|roundin|roundout|roundends|roundtoschedule|roundup|rounddown|addalert|unpay|touches|isedited|tomorrow|yesterday|overlaps|overlap|addentry|accrueup|accruedown|getbalance|setbalance)\\b"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other",
+          "match": "\\$[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        },
+        {
+          "name": "variable.other.readwrite",
+          "match": "(?i)\\b(payrate|isfirsttoday|islasttoday|hours|minutes|seconds|breakseconds|minutesout|minutestil|punchset|category|punchdate|intime|outtime|inismissing|outismissing|istimes|ishours|ispayonly|inisedited|outisedited|hourstopunch|hourstopunchot|linetonow|inip|outip)\\b"
+        }
+      ]
+    },
+    "object-names": {
+      "patterns": [
+        {
+          "name": "storage.type",
+          "match": "(?i)\\b(employee|reportingdate)\\b"
+        }
+      ]
+    },
+    "boolean-literals": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean",
+          "match": "(?i)\\b(true|false)\\b"
+        }
+      ]
+    }
+  }
+}

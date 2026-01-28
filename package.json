@@ -65,7 +65,7 @@
     "configurationDefaults": {
       "[swipeclock]": {
         "editor.semanticHighlighting.enabled": true,
-        "editor.defaultFormatter": "swipeclock-scripting"
+        "editor.defaultFormatter": "JeremyFail.swipeclock-scripting"
       }
     },
     "configuration": {

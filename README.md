@@ -87,7 +87,6 @@ A **document formatter** is included. Use **Format Document** (e.g. `Alt+Shift+F
   - **Swipeclock Scripting: Indent Size** (`swipeclock.formatting.indentSize`) – number of spaces when using spaces (default: 4, used as fallback only).
   - **Swipeclock Scripting: Brace Style** (`swipeclock.formatting.braceStyle`) – `javascript` (brace on same line) or `allman` (brace on new line).
 - The formatter respects your editor's **Insert Spaces** / **Tab Size** settings. You can also choose a different default formatter for Swipeclock files in VS Code settings if you prefer.
-- **Extension ID**: The formatter is provided by the extension **swipeclock-scripting**. If you set a default formatter manually for `[swipeclock]`, use `"editor.defaultFormatter": "swipeclock-scripting"`.
 
 ### Hover Documentation
 

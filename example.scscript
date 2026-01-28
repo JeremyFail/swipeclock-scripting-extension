@@ -3,21 +3,21 @@
 
 // Employee object properties
 if (employee.department == "OPS") {
-    addalert("Employee is in OPS department");
+  addalert("Employee is in OPS department");
 
-    // Check employee name
-    if (employee.firstname contains "John") {
-        addalert("Found John");
-    }
+  // Check employee name
+  if (employee.firstname contains "John") {
+    addalert("Found John");
+  }
 }
 
 // ReportingDate object properties
 if (reportingdate.isfirstdayofmonth) {
-    addalert("First day of the month");
+  addalert("First day of the month");
 }
 
 if (reportingdate.totalhours > 8) {
-    addalert("Overtime alert");
+  addalert("Overtime alert");
 }
 
 // Global functions
@@ -32,21 +32,21 @@ roundout("D15"); // Round out punches down to nearest 15 minutes
 // String functions
 $dept = translate(employee.department, "100|110|200", "Warehouse,Shipping,Accounting");
 if (within(employee.location, "100|110|200")) {
-    addalert("Location found");
+  addalert("Location found");
 }
 
 // Time comparisons
 if (intime > "8:00am") {
-    addalert("Late arrival");
+  addalert("Late arrival");
 }
 
 if (intime < 7:00am) {
-    addalert("Early arrival");
+  addalert("Early arrival");
 }
 
 // Date comparisons
 if (reportingdate.date > "2024-01-01") {
-    addalert("Date is after 2024-01-01");
+  addalert("Date is after 2024-01-01");
 }
 
 // Accrual functions
@@ -56,20 +56,20 @@ setbalance("Sick", 0);
 
 // Additional functions
 if (touches(6:00am, 3:00pm)) {
-    addalert("Punch touches time range");
+  addalert("Punch touches time range");
 }
 
 if (overlaps(6:00am, 3:00pm)) {
-    addalert("Punch overlaps time range");
+  addalert("Punch overlaps time range");
 }
 
 // Global properties
 if (isfirsttoday) {
-    addalert("First punch of the day");
+  addalert("First punch of the day");
 }
 
 if (hours > 8) {
-    addalert("More than 8 hours");
+  addalert("More than 8 hours");
 }
 
 // Local variables (with $ prefix)
@@ -86,22 +86,24 @@ that spans multiple lines */
 
 // Operators
 if (employee.department == "OPS" && reportingdate.totalhours > 8) {
-    addalert("OPS employee with overtime");
+  addalert("OPS employee with overtime");
 }
 
 if (employee.department contains "OPS" || employee.department startswith "HR") {
-    addalert("Department match");
+  addalert("Department match");
 }
 
 // Nested if statements
 if (employee.department == "OPS") {
-    if (reportingdate.totalhours > 8) {
-        addalert("Overtime");
-        } else if (reportingdate.totalhours < 4) {
-        addalert("Part time");
-    }
-    } else {
-    addalert("Other department");
+  if (reportingdate.totalhours > 8) {
+    addalert("Overtime");
+  } else if (reportingdate.totalhours < 4) {
+    addalert("Part time");
+  } else {
+    addalert("Regular hours");
+  }
+} else {
+  addalert("Other department");
 }
 
 // ============================================

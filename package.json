@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "author": "JeremyFail",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -54,11 +54,22 @@
       {
         "language": "swipeclock",
         "scopes": {
-          "variable": ["variable.other", "variable.other.readwrite"],
-          "property": ["variable.other.property"],
-          "variable.readonly": ["variable.other.property.invalid"],
-          "class": ["storage.type"],
-          "function": ["entity.name.function"]
+          "variable": [
+            "variable.other",
+            "variable.other.readwrite"
+          ],
+          "property": [
+            "variable.other.property"
+          ],
+          "variable.readonly": [
+            "variable.other.property.invalid"
+          ],
+          "class": [
+            "storage.type"
+          ],
+          "function": [
+            "entity.name.function"
+          ]
         }
       }
     ],
@@ -78,7 +89,10 @@
         },
         "swipeclock.formatting.braceStyle": {
           "type": "string",
-          "enum": ["javascript", "allman"],
+          "enum": [
+            "javascript",
+            "allman"
+          ],
           "default": "javascript",
           "description": "Brace style: 'javascript' = opening brace on same line as if/else; 'allman' = opening brace on new line"
         },

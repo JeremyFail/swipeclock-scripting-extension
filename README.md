@@ -62,10 +62,9 @@ Alternatively, to package and install manually:
 ### File Association
 
 Files with these extensions are automatically recognized as Swipeclock scripting:
-- `.twp`, `.twpscript` - TimeWorksPlus script files
-- `.swipeclock`, `.scscript` - Swipeclock script files
-- `.wfhscript`, `.wfhub`, `.workforcehub` - WorkforceHub script files
-- `.timeworksplus` - TimeWorksPlus script files (alternative)
+- `.swipeclock`, `.scscript`
+- `.twp`, `.twpscript`, `.timeworksplus`
+- `.wfhscript`, `.wfhub`, `.workforcehub`
 
 ### Auto-completion
 

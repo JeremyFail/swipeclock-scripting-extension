@@ -11,11 +11,13 @@ import { SwipeclockDocumentFormatter } from './documentFormatter';
 export function activate(context: vscode.ExtensionContext) {
     console.log('Swipeclock Scripting extension is now active');
 
-    // Register completion provider
+    // Register completion provider ($ triggers local-var list; . and letters also trigger)
     const completionProvider = vscode.languages.registerCompletionItemProvider(
         'swipeclock',
         new SwipeclockCompletionProvider(),
-        '.', // Trigger on dot
+        // Trigger on $ (local vars) and dot (object properties)
+        '$', '.',
+        // Trigger on letters (global variables/keywords/functions)
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
         'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',

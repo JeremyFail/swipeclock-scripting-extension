@@ -191,6 +191,81 @@ export const globalProperties = [
   { name: 'outip', detail: 'string', documentation: 'IP address of the out punch' }
 ];
 
+// Reserved names that are not user variables (used to filter document variable completion)
+const reservedVariableNames = new Set([
+  'if', 'else', 'and', 'or', 'true', 'false', 'mod',
+  'contains', 'startswith', 'endswith',
+  'dateadd', 'dateserial', 'weekday', 'cdate', 'cdatetime', 'ctime',
+  'day', 'month', 'year', 'val', 'cint', 'cstr', 'abs',
+  'translate', 'within', 'left', 'right', 'mid',
+  'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
+  'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
+  'overlaps', 'overlap', 'addentry',
+  'accrueup', 'accruedown', 'getbalance', 'setbalance',
+  'employee', 'reportingdate',
+  'payrate', 'isfirsttoday', 'islasttoday', 'hours', 'minutes', 'seconds',
+  'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',
+  'punchdate', 'intime', 'outtime', 'inismissing', 'outismissing',
+  'istimes', 'ishours', 'ispayonly', 'inisedited', 'outisedited',
+  'hourstopunch', 'hourstopunchot', 'linetonow', 'inip', 'outip'
+]);
+
+/**
+ * Collect variable names defined in the document (left-hand side of =).
+ * Returns a Map of display name -> insert text (so $myvar stays as $myvar for local vars).
+ */
+function getDocumentVariables(document: vscode.TextDocument): Map<string, string> {
+  const result = new Map<string, string>();
+  const text = document.getText();
+  const lines = text.split(/\r?\n/);
+  let inBlockComment = false;
+
+  const assignmentPattern = /(\$[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*)\s*=/gi;
+
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    let lineToCheck = lines[lineIndex];
+
+    if (inBlockComment) {
+      const endIdx = lineToCheck.indexOf('*/');
+      if (endIdx !== -1) {
+        inBlockComment = false;
+        lineToCheck = lineToCheck.substring(endIdx + 2);
+      } else {
+        continue;
+      }
+    } else {
+      const blockStart = lineToCheck.indexOf('/*');
+      if (blockStart !== -1) {
+        const blockEnd = lineToCheck.indexOf('*/', blockStart + 2);
+        if (blockEnd === -1) {
+          inBlockComment = true;
+          lineToCheck = lineToCheck.substring(0, blockStart);
+        } else {
+          lineToCheck = lineToCheck.substring(0, blockStart) + lineToCheck.substring(blockEnd + 2);
+        }
+      }
+    }
+
+    const commentIdx = lineToCheck.indexOf('//');
+    if (commentIdx !== -1) {
+      lineToCheck = lineToCheck.substring(0, commentIdx);
+    }
+
+    let match: RegExpExecArray | null;
+    assignmentPattern.lastIndex = 0;
+    while ((match = assignmentPattern.exec(lineToCheck)) !== null) {
+      const rawName = match[1];
+      const lower = rawName.toLowerCase();
+      const withoutDollar = lower.replace(/^\$/, '');
+      if (reservedVariableNames.has(withoutDollar)) continue;
+      if (withoutDollar === 'employee' || withoutDollar === 'reportingdate') continue;
+      // Use original casing for display/insert so $MyVar stays $MyVar
+      result.set(lower, rawName);
+    }
+  }
+  return result;
+}
+
 // Operators
 const operators = [
   { name: 'and', detail: 'logical AND operator', documentation: 'Logical AND (also &&)' },
@@ -267,6 +342,70 @@ export class SwipeclockCompletionProvider implements vscode.CompletionItemProvid
       });
       return items;
     }
+
+    // When user has typed $ (with or without more chars), only suggest local variables
+    const localVarPrefixMatch = linePrefix.match(/\$[a-zA-Z0-9_]*$/);
+    if (localVarPrefixMatch) {
+      const typedAfterDollar = localVarPrefixMatch[0].slice(1); // e.g. "my" from "$my"
+      const typedLower = typedAfterDollar.toLowerCase();
+      const localVarReplaceRange = new vscode.Range(
+        position.line,
+        position.character - localVarPrefixMatch[0].length,
+        position.line,
+        position.character
+      );
+      const documentVariables = getDocumentVariables(document);
+      const localVars: Array<{ insertText: string; key: string }> = [];
+      documentVariables.forEach((insertText, key) => {
+        if (!key.startsWith('$')) return;
+        localVars.push({ insertText, key });
+      });
+
+      // When they typed something after $, only suggest vars whose name contains that substring (case-insensitive)
+      const filtered = typedLower.length === 0
+        ? localVars
+        : localVars.filter(({ key }) => {
+            const nameAfterDollar = key.slice(1).toLowerCase();
+            return nameAfterDollar.includes(typedLower);
+          });
+
+      // Sort: names that start with the typed prefix first, then others that contain it
+      filtered.sort((a, b) => {
+        const nameA = a.key.slice(1).toLowerCase();
+        const nameB = b.key.slice(1).toLowerCase();
+        const aStarts = typedLower.length === 0 || nameA.startsWith(typedLower);
+        const bStarts = typedLower.length === 0 || nameB.startsWith(typedLower);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return nameA.localeCompare(nameB);
+      });
+
+      filtered.forEach(({ insertText, key }) => {
+        const item = new vscode.CompletionItem(insertText, vscode.CompletionItemKind.Variable);
+        item.detail = 'Local variable (defined in this script)';
+        item.documentation = new vscode.MarkdownString('Local variable');
+        item.insertText = insertText;
+        item.filterText = key; // not used for filtering when we filter ourselves, but keep for display
+        const nameAfterDollar = key.slice(1).toLowerCase();
+        const startsWithTyped = typedLower.length === 0 || nameAfterDollar.startsWith(typedLower);
+        item.sortText = (startsWithTyped ? '0_' : '1_') + key;
+        item.range = localVarReplaceRange;
+        items.push(item);
+      });
+      return items;
+    }
+
+    // Add variables defined in this document (global and local $var)
+    const documentVariables = getDocumentVariables(document);
+    documentVariables.forEach((insertText, key) => {
+      const item = new vscode.CompletionItem(insertText, vscode.CompletionItemKind.Variable);
+      item.detail = key.startsWith('$') ? 'Local variable (defined in this script)' : 'Variable (defined in this script)';
+      item.documentation = new vscode.MarkdownString(key.startsWith('$') ? 'Local variable' : 'Global variable');
+      item.insertText = insertText;
+      item.filterText = key;
+      item.sortText = '0_' + key;
+      items.push(item);
+    });
 
     // Add all global functions (case-insensitive)
     globalFunctions.forEach(func => {

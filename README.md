@@ -30,6 +30,7 @@ For documentation on how to write scripts, check the [Swipeclock Knowledge Base]
   - Global timecard properties
   - Dynamic properties (department1-9, location1-9, home1-9, payrate1-9)
   - Operators and keywords
+  - Completion suggestions for local and global variables defined in the script
 
 - **Hover Documentation**: Hover over any function, property, or operator to see detailed documentation with examples.
 

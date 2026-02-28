@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { employeeProperties, reportingDateProperties } from './completionProvider';
+import { employeeProperties, reportingDateProperties, globalFunctions, globalProperties } from './completionProvider';
 
 // Create sets of valid property names (case-insensitive)
 const validEmployeeProperties = new Set(
@@ -7,6 +7,9 @@ const validEmployeeProperties = new Set(
 );
 const validReportingDateProperties = new Set(
   reportingDateProperties.map(p => p.name.toLowerCase())
+);
+const validGlobalFunctions = new Set(
+  globalFunctions.map(f => f.name.toLowerCase())
 );
 
 // Add dynamic properties (department1-9, location1-9, etc.)
@@ -28,6 +31,59 @@ const legend = new vscode.SemanticTokensLegend(
   []
 );
 
+function maskQuotedSegments(line: string): { maskedLine: string; invalidSingleQuotedRanges: Array<{ start: number; end: number }> } {
+  const chars = line.split('');
+  const invalidSingleQuotedRanges: Array<{ start: number; end: number }> = [];
+
+  let inDouble = false;
+  let inSingle = false;
+  let singleStart = -1;
+
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+    const prev = i > 0 ? chars[i - 1] : '';
+
+    if (inDouble) {
+      chars[i] = ' ';
+      if (ch === '"' && prev !== '\\') {
+        inDouble = false;
+      }
+      continue;
+    }
+
+    if (inSingle) {
+      chars[i] = ' ';
+      if (ch === '\'' && prev !== '\\') {
+        inSingle = false;
+        invalidSingleQuotedRanges.push({ start: singleStart, end: i + 1 });
+        singleStart = -1;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inDouble = true;
+      chars[i] = ' ';
+      continue;
+    }
+
+    if (ch === '\'') {
+      inSingle = true;
+      singleStart = i;
+      chars[i] = ' ';
+    }
+  }
+
+  if (inSingle && singleStart >= 0) {
+    invalidSingleQuotedRanges.push({ start: singleStart, end: chars.length });
+  }
+
+  return {
+    maskedLine: chars.join(''),
+    invalidSingleQuotedRanges
+  };
+}
+
 export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
   get legend() {
     return legend;
@@ -41,23 +97,14 @@ export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemantic
     const text = document.getText();
     const lines = text.split('\n');
 
-    // Keywords and functions to exclude from variable highlighting
-    const reservedWords = new Set([
+    // Keywords/operators/functions/properties to exclude from variable highlighting.
+    // Build from shared completion lists to avoid drift (e.g. newly added functions like isdate).
+    const reservedWords = new Set<string>([
       'if', 'else', 'and', 'or', 'true', 'false', 'mod',
       'contains', 'startswith', 'endswith',
-      'dateadd', 'dateserial', 'weekday', 'cdate', 'cdatetime', 'ctime',
-      'day', 'month', 'year', 'val', 'cint', 'cstr', 'abs',
-      'translate', 'within', 'left', 'right', 'mid',
-      'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
-      'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
-      'overlaps', 'overlap', 'addentry',
-      'accrueup', 'accruedown', 'getbalance', 'setbalance',
       'employee', 'reportingdate',
-      'payrate', 'isfirsttoday', 'islasttoday', 'hours', 'minutes', 'seconds',
-      'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',
-      'punchdate', 'intime', 'outtime', 'inismissing', 'outismissing',
-      'istimes', 'ishours', 'ispayonly', 'inisedited', 'outisedited',
-      'hourstopunch', 'hourstopunchot', 'linetonow', 'inip', 'outip'
+      ...globalFunctions.map(f => f.name.toLowerCase()),
+      ...globalProperties.map(p => p.name.toLowerCase())
     ]);
 
     // Regex patterns
@@ -108,6 +155,9 @@ export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemantic
         // Only process the part before the comment
         lineToProcess = lineToProcess.substring(0, commentIndex);
       }
+
+      const { maskedLine } = maskQuotedSegments(lineToProcess);
+      lineToProcess = maskedLine;
       
       // Match object properties (employee.property, reportingdate.property)
       let match;
@@ -138,14 +188,16 @@ export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemantic
         // Highlight the property name
         const propertyStart = startPos + objectName.length + 1; // +1 for the dot
         const propertyLength = propertyName.length;
+        const afterProperty = lineToProcess.substring(propertyStart + propertyLength);
+        const isCallForm = /^\s*\(/.test(afterProperty);
         
         if (isValid) {
-          // Valid property - yellow
+          // Valid property/member - function token when called, property token otherwise
           builder.push(
             lineIndex,
             propertyStart,
             propertyLength,
-            1, // property token type
+            isCallForm ? 3 : 1, // function token type for call form, property otherwise
             0  // no modifier
           );
         } else {
@@ -162,6 +214,32 @@ export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemantic
 
       // Reset regex lastIndex for next pattern
       objectPropertyPattern.lastIndex = 0;
+
+      // Match global function calls (name followed by opening parenthesis)
+      const functionCallPattern = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s*\()/g;
+      while ((match = functionCallPattern.exec(lineToProcess)) !== null) {
+        const startPos = match.index;
+        const functionName = match[1].toLowerCase();
+        const rangeKey = `${lineIndex}:${startPos}:${startPos + match[1].length}`;
+
+        if (highlightedRanges.has(rangeKey)) continue;
+        if (!validGlobalFunctions.has(functionName)) continue;
+
+        // Skip object member calls (employee.xxx(...), reportingdate.xxx(...))
+        const beforeMatch = lineToProcess.substring(Math.max(0, startPos - 20), startPos);
+        if (/(employee|reportingdate)\.$/i.test(beforeMatch)) continue;
+
+        highlightedRanges.add(rangeKey);
+        builder.push(
+          lineIndex,
+          startPos,
+          match[1].length,
+          3, // function token type
+          0  // no modifier
+        );
+      }
+
+      functionCallPattern.lastIndex = 0;
 
       // Match local variables ($variable)
       while ((match = localVariablePattern.exec(lineToProcess)) !== null) {
@@ -208,13 +286,6 @@ export class SwipeclockSemanticTokensProvider implements vscode.DocumentSemantic
         // Skip if it's followed by a dot (likely an object property access)
         const afterMatch = lineToProcess.substring(startPos + match[0].length, startPos + match[0].length + 1);
         if (afterMatch === '.') continue;
-
-        // Skip if it's in quotes
-        const beforeQuote = lineToProcess.substring(0, startPos);
-        const afterQuote = lineToProcess.substring(startPos + match[0].length);
-        const quotesBefore = (beforeQuote.match(/"/g) || []).length;
-        const quotesAfter = (afterQuote.match(/"/g) || []).length;
-        if (quotesBefore % 2 === 1 && quotesAfter % 2 === 1) continue;
 
         highlightedRanges.add(rangeKey);
 

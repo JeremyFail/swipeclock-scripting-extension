@@ -22,6 +22,10 @@ const validFunctions = new Set(
     globalFunctions.map(f => f.name.toLowerCase())
 );
 
+const configureExtendedFieldsSettingUri = vscode.Uri.parse(
+    `command:workbench.action.openSettings?${encodeURIComponent(JSON.stringify(['swipeclock.warnExtendedFields']))}`
+);
+
 // Reserved words that are not variables
 const reservedWords = new Set([
     'if', 'else', 'and', 'or', 'true', 'false', 'mod',
@@ -40,6 +44,59 @@ const reservedWords = new Set([
     'istimes', 'ishours', 'ispayonly', 'inisedited', 'outisedited',
     'hourstopunch', 'hourstopunchot', 'linetonow', 'inip', 'outip'
 ]);
+
+function maskQuotedSegments(line: string): { maskedLine: string; invalidSingleQuotedRanges: Array<{ start: number; end: number }> } {
+    const chars = line.split('');
+    const invalidSingleQuotedRanges: Array<{ start: number; end: number }> = [];
+
+    let inDouble = false;
+    let inSingle = false;
+    let singleStart = -1;
+
+    for (let i = 0; i < chars.length; i++) {
+        const ch = chars[i];
+        const prev = i > 0 ? chars[i - 1] : '';
+
+        if (inDouble) {
+            chars[i] = ' ';
+            if (ch === '"' && prev !== '\\') {
+                inDouble = false;
+            }
+            continue;
+        }
+
+        if (inSingle) {
+            chars[i] = ' ';
+            if (ch === '\'' && prev !== '\\') {
+                inSingle = false;
+                invalidSingleQuotedRanges.push({ start: singleStart, end: i + 1 });
+                singleStart = -1;
+            }
+            continue;
+        }
+
+        if (ch === '"') {
+            inDouble = true;
+            chars[i] = ' ';
+            continue;
+        }
+
+        if (ch === '\'') {
+            inSingle = true;
+            singleStart = i;
+            chars[i] = ' ';
+        }
+    }
+
+    if (inSingle && singleStart >= 0) {
+        invalidSingleQuotedRanges.push({ start: singleStart, end: chars.length });
+    }
+
+    return {
+        maskedLine: chars.join(''),
+        invalidSingleQuotedRanges
+    };
+}
 
 export class SwipeclockDiagnosticsProvider {
     private diagnosticCollection: vscode.DiagnosticCollection;
@@ -101,6 +158,16 @@ export class SwipeclockDiagnosticsProvider {
                 lineToCheck = lineToCheck.substring(0, commentIndex);
             }
 
+            const { maskedLine, invalidSingleQuotedRanges } = maskQuotedSegments(lineToCheck);
+            invalidSingleQuotedRanges.forEach(rangeInfo => {
+                diagnostics.push(new vscode.Diagnostic(
+                    new vscode.Range(lineIndex, rangeInfo.start, lineIndex, rangeInfo.end),
+                    'Single-quoted strings are invalid in Swipeclock scripting. Use double quotes (") for strings.',
+                    vscode.DiagnosticSeverity.Error
+                ));
+            });
+            lineToCheck = maskedLine;
+
             // Check for invalid object properties (employee.* and reportingdate.*)
             const objectPropertyPattern = /(employee|reportingdate)\.([a-zA-Z_][a-zA-Z0-9_]*)/gi;
             while ((match = objectPropertyPattern.exec(lineToCheck)) !== null) {
@@ -139,10 +206,10 @@ export class SwipeclockDiagnosticsProvider {
                         
                         if (fieldType === 'home' && fieldNumber > 3) {
                             shouldWarn = true;
-                            message = `home${fieldNumber} requires additional home fields to be enabled in account settings.`;
+                            message = `home${fieldNumber} requires additional home fields to be enabled in the client's account settings.`;
                         } else if ((fieldType === 'department' || fieldType === 'location' || fieldType === 'payrate') && fieldNumber > 0) {
                             shouldWarn = true;
-                            message = `${fieldType}${fieldNumber} requires additional ${fieldType} fields to be enabled in account settings.`;
+                            message = `${fieldType}${fieldNumber} requires additional ${fieldType} fields to be enabled in the client's account settings.`;
                         }
                         
                         if (shouldWarn) {
@@ -158,6 +225,11 @@ export class SwipeclockDiagnosticsProvider {
                                 message,
                                 vscode.DiagnosticSeverity.Warning
                             );
+                            diagnostic.source = 'Configure warning';
+                            diagnostic.code = {
+                                value: 'swipeclock.extendedFieldWarning',
+                                target: configureExtendedFieldsSettingUri
+                            };
                             
                             diagnostics.push(diagnostic);
                         }
@@ -179,7 +251,7 @@ export class SwipeclockDiagnosticsProvider {
                         
                         const diagnostic = new vscode.Diagnostic(
                             range,
-                            `Invalid property '${propertyName}' on ${objectName} object.`,
+                            `Invalid property '${propertyName}' on the ${objectName} object.`,
                             vscode.DiagnosticSeverity.Error
                         );
                         
@@ -203,13 +275,6 @@ export class SwipeclockDiagnosticsProvider {
                 // Skip if it's part of object.property syntax (e.g., employee.someMethod())
                 const beforeMatch = lineToCheck.substring(Math.max(0, startPos - 20), startPos);
                 if (/(employee|reportingdate)\.$/i.test(beforeMatch)) continue;
-                
-                // Skip if it's in a string
-                const beforeQuote = lineToCheck.substring(0, startPos);
-                const afterQuote = lineToCheck.substring(startPos + match[0].length);
-                const quotesBefore = (beforeQuote.match(/"/g) || []).length;
-                const quotesAfter = (afterQuote.match(/"/g) || []).length;
-                if (quotesBefore % 2 === 1 && quotesAfter % 2 === 1) continue;
                 
                 // Check if function is valid
                 if (!validFunctions.has(functionName)) {
@@ -252,15 +317,14 @@ export class SwipeclockDiagnosticsProvider {
                 const varName = match[1].toLowerCase();
                 const matchIndex = match.index;
                 if (reservedWords.has(varName.replace(/^\$/, ''))) continue;
+
                 const beforeMatch = lineToCheck.substring(Math.max(0, matchIndex - 20), matchIndex);
                 if (/(employee|reportingdate)\.$/i.test(beforeMatch)) continue;
+
                 const afterMatch = lineToCheck.substring(matchIndex + match[0].length);
                 if (afterMatch.startsWith('.')) continue;
-                const beforeQuote = lineToCheck.substring(0, matchIndex);
-                const afterQuote = lineToCheck.substring(matchIndex + match[0].length);
-                const quotesBefore = (beforeQuote.match(/"/g) || []).length;
-                const quotesAfter = (afterQuote.match(/"/g) || []).length;
-                if (quotesBefore % 2 === 1 && quotesAfter % 2 === 1) continue;
+                if (/^\s*\(/.test(afterMatch)) continue;
+
                 const equalsIndex = lineToCheck.indexOf('=', matchIndex);
                 if (equalsIndex !== -1) {
                     const beforeEquals = lineToCheck.substring(matchIndex, equalsIndex);
@@ -274,15 +338,13 @@ export class SwipeclockDiagnosticsProvider {
                 const varName = match[1].toLowerCase();
                 const matchIndex = match.index;
                 if (reservedWords.has(varName)) continue;
+
                 const beforeMatch = lineToCheck.substring(Math.max(0, matchIndex - 20), matchIndex);
                 if (/(employee|reportingdate)\.$/i.test(beforeMatch)) continue;
                 const afterMatch = lineToCheck.substring(matchIndex + match[0].length);
                 if (afterMatch.startsWith('.')) continue;
-                const beforeQuote = lineToCheck.substring(0, matchIndex);
-                const afterQuote = lineToCheck.substring(matchIndex + match[0].length);
-                const quotesBefore = (beforeQuote.match(/"/g) || []).length;
-                const quotesAfter = (afterQuote.match(/"/g) || []).length;
-                if (quotesBefore % 2 === 1 && quotesAfter % 2 === 1) continue;
+                if (/^\s*\(/.test(afterMatch)) continue;
+                
                 const equalsIndex = lineToCheck.indexOf('=', matchIndex);
                 if (equalsIndex !== -1) {
                     const beforeEquals = lineToCheck.substring(matchIndex, equalsIndex);

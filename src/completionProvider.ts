@@ -105,14 +105,94 @@ export const reportingDateProperties = [
   { name: 'islastdayofmonth', detail: 'boolean', documentation: 'Returns true on the last day of the month' },
   { name: 'payperiodstart', detail: 'date', documentation: 'Returns the date of the first day of the pay period' },
   { name: 'payperiodend', detail: 'date', documentation: 'Returns the date of the last day of the pay period' },
-  { name: 'isholiday', detail: 'boolean', documentation: 'Returns true if the date is a holiday' },
+  {
+    name: 'isholiday',
+    detail: 'boolean',
+    documentation: 'Property form: returns true if reportingdate.date is a holiday. Function form: reportingdate.isholiday(dateValue) checks a specific date (date string or date object).',
+    overloads: [
+      {
+        signature: 'reportingdate.isholiday',
+        detail: 'Property form',
+        documentation: 'Returns true if reportingdate.date is a holiday.'
+      },
+      {
+        signature: 'reportingdate.isholiday(dateValue)',
+        detail: 'Function form',
+        documentation: 'Checks whether the specified date value is a holiday. Accepts a date string or date object.'
+      }
+    ]
+  },
   { name: 'spread', detail: 'timespan', documentation: 'Returns the amount of time between first in punch and last out punch' },
-  { name: 'totalhours', detail: 'number', documentation: 'Hours in the day' },
-  { name: 'totalhoursot', detail: 'number', documentation: 'Hours in the day that are overtime eligible' },
+  {
+    name: 'totalhours',
+    detail: 'number',
+    documentation: 'Property form: hours in the day. Function form: reportingdate.totalhours("Category1|Category2") returns hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.totalhours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the day.'
+      },
+      {
+        signature: 'reportingdate.totalhours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
+  {
+    name: 'totalhoursot',
+    detail: 'number',
+    documentation: 'Property form: overtime-eligible hours in the day. Function form: reportingdate.totalhoursot("Category1|Category2") returns overtime-eligible hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.totalhoursot',
+        detail: 'Property form',
+        documentation: 'Returns overtime-eligible hours in the day.'
+      },
+      {
+        signature: 'reportingdate.totalhoursot(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns overtime-eligible hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
   { name: 'hourstodate', detail: 'number', documentation: 'Hours to date in the week' },
   { name: 'hourstodateot', detail: 'number', documentation: 'Hours to date in the week that are overtime eligible' },
-  { name: 'weekhours', detail: 'number', documentation: 'Hours in the week' },
-  { name: 'pphours', detail: 'number', documentation: 'Hours in the pay period' },
+  {
+    name: 'weekhours',
+    detail: 'number',
+    documentation: 'Property form: hours in the week. Function form: reportingdate.weekhours("Category1|Category2") returns weekly hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.weekhours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the week.'
+      },
+      {
+        signature: 'reportingdate.weekhours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns weekly hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
+  {
+    name: 'pphours',
+    detail: 'number',
+    documentation: 'Property form: hours in the pay period. Function form: reportingdate.pphours("Category1|Category2") returns pay-period hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.pphours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the pay period.'
+      },
+      {
+        signature: 'reportingdate.pphours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns pay-period hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
   { name: 'islastpunchpp', detail: 'boolean', documentation: 'Last punch date of the pay period' },
   { name: 'islastpunchweek', detail: 'boolean', documentation: 'Last punch date of the week' },
   { name: 'totalweek', detail: 'function', documentation: 'Returns amounts in numeric prompts and dollar amounts in the work week. Requires argument: reportingdate.totalweek("<promptFieldName>")' },

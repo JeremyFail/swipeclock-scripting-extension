@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { globalFunctions } from './completionProvider';
+import { globalFunctions, reportingDateProperties } from './completionProvider';
 
 // Type for function overload
 interface FunctionOverload {
@@ -18,10 +18,33 @@ interface FunctionWithOverloads {
     overloads?: FunctionOverload[];
 }
 
+interface MemberFunctionSignature {
+    signature: string;
+    documentation: string;
+}
+
 // Build case-insensitive function lookup
 const functionsMap = new Map<string, FunctionWithOverloads>();
 globalFunctions.forEach(f => {
     functionsMap.set(f.name.toLowerCase(), f as FunctionWithOverloads);
+});
+
+const reportingDateFunctionMap = new Map<string, MemberFunctionSignature[]>();
+reportingDateProperties.forEach(prop => {
+    const propAny = prop as any;
+    const overloads = propAny.overloads as Array<{ signature: string; documentation: string }> | undefined;
+    if (!overloads || overloads.length === 0) return;
+
+    const callableOverloads = overloads
+        .filter(overload => overload.signature.includes('('))
+        .map(overload => ({
+            signature: overload.signature,
+            documentation: overload.documentation
+        }));
+
+    if (callableOverloads.length > 0) {
+        reportingDateFunctionMap.set(prop.name.toLowerCase(), callableOverloads);
+    }
 });
 
 /**
@@ -41,35 +64,37 @@ function parseParametersFromSignature(signature: string): string[] {
  * Returns 'string', 'number', or 'unknown'.
  */
 function detectFirstArgumentType(argsText: string): 'string' | 'number' | 'unknown' {
-    // Trim whitespace
-    const trimmed = argsText.trim();
-    if (!trimmed) return 'unknown';
-    
-    // Check if it starts with a quote (string)
-    // Note: round() and time-rounding functions require a string (e.g. "N15" or "7:45am-8:00am=8:00am"); time literals like 7:00am are not valid for round.
-    if (trimmed.startsWith('"') || trimmed.startsWith("'")) {
-        return 'string';
+    const text = argsText.trim();
+    if (!text) return 'unknown';
+
+    let inString = false;
+    let stringChar = '';
+    let depth = 0;
+    let firstArg = '';
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (!inString) {
+            if (ch === '"' || ch === "'") {
+                inString = true;
+                stringChar = ch;
+            } else if (ch === '(') {
+                depth++;
+            } else if (ch === ')') {
+                if (depth > 0) depth--;
+            } else if (ch === ',' && depth === 0) {
+                break;
+            }
+        } else if (ch === stringChar && text[i - 1] !== '\\') {
+            inString = false;
+        }
+        firstArg += ch;
     }
-    
-    // Check if it starts with a digit or minus sign (number)
-    if (/^[-+]?\d/.test(trimmed)) {
-        return 'number';
-    }
-    
-    // Check if it's a variable that might be a number (like hours, totalhours, etc.)
-    const numVars = ['hours', 'minutes', 'seconds', 'totalhours', 'weekhours', 'pphours', 'hourstodate', 
-                     'totalhoursot', 'hourstodateot', 'breakseconds', 'punchset'];
-    const varMatch = trimmed.match(/^([a-zA-Z_][a-zA-Z0-9_]*)/);
-    if (varMatch && numVars.includes(varMatch[1].toLowerCase())) {
-        return 'number';
-    }
-    
-    // Check if it's a variable that's likely a string (like department, category, etc.)
-    const stringVars = ['department', 'location', 'category', 'firstname', 'lastname', 'title', 'code'];
-    if (varMatch && stringVars.includes(varMatch[1].toLowerCase())) {
-        return 'string';
-    }
-    
+
+    const first = firstArg.trim();
+    if (!first) return 'unknown';
+    if (first.startsWith('"') || first.startsWith("'")) return 'string';
+    if (/^[-+]?\d+(\.\d+)?$/.test(first)) return 'number';
     return 'unknown';
 }
 
@@ -110,6 +135,57 @@ export class SwipeclockSignatureHelpProvider implements vscode.SignatureHelpProv
         if (!nameMatch) return null;
 
         const functionName = nameMatch[1].toLowerCase();
+
+        // reportingdate.<member>(...) overload-style signatures
+        const objectMemberMatch = beforeParen.match(/(employee|reportingdate)\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*$/i);
+        if (objectMemberMatch) {
+            const objectName = objectMemberMatch[1].toLowerCase();
+            const memberName = objectMemberMatch[2].toLowerCase();
+            if (objectName === 'reportingdate') {
+                const memberSignatures = reportingDateFunctionMap.get(memberName);
+                if (memberSignatures && memberSignatures.length > 0) {
+                    const argsSoFar = prefix.substring(callStart + 1, prefix.length);
+                    let activeParameter = 0;
+                    let inString = false;
+                    let stringChar = '';
+                    for (let i = 0; i < argsSoFar.length; i++) {
+                        const c = argsSoFar[i];
+                        if (!inString) {
+                            if (c === '"' || c === "'") {
+                                inString = true;
+                                stringChar = c;
+                            } else if (c === ',') {
+                                activeParameter++;
+                            }
+                        } else if (c === stringChar && (i === 0 || argsSoFar[i - 1] !== '\\')) {
+                            inString = false;
+                        }
+                    }
+
+                    const signatures = memberSignatures.map(sigInfo => {
+                        const paramNames = parseParametersFromSignature(sigInfo.signature);
+                        const parameters: vscode.ParameterInformation[] = paramNames.map(name => ({
+                            label: name,
+                            documentation: new vscode.MarkdownString(sigInfo.documentation)
+                        }));
+
+                        const sig = new vscode.SignatureInformation(
+                            sigInfo.signature,
+                            new vscode.MarkdownString(sigInfo.documentation)
+                        );
+                        sig.parameters = parameters;
+                        return sig;
+                    });
+
+                    const help = new vscode.SignatureHelp();
+                    help.signatures = signatures;
+                    help.activeSignature = 0;
+                    help.activeParameter = Math.min(activeParameter, Math.max(0, signatures[0]?.parameters.length - 1 || 0));
+                    return help;
+                }
+            }
+        }
+
         const fn = functionsMap.get(functionName);
         if (!fn) return null;
 

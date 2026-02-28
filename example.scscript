@@ -63,6 +63,14 @@ if (overlaps(6:00am, 3:00pm)) {
   addalert("Punch overlaps time range");
 }
 
+// Properties that have function overloads
+$isHoliday = reportingdate.isholiday;
+$isYesterdayHoliday = reportingdate.isholiday(reportingdate.date - 1);
+
+// Functions with multiple signatures
+round("N15");
+round(5.555);
+
 // Global properties
 if (isfirsttoday) {
   addalert("First punch of the day");
@@ -108,9 +116,8 @@ if (employee.department == "OPS") {
 
 // ============================================
 // TEST CASES FOR ERROR AND WARNING HIGHLIGHTING
-// (Uncomment to validate)
 // ============================================
-/*
+
 
 // Invalid property - should show ERROR (red squiggles)
 employee.invalidproperty;
@@ -150,6 +157,10 @@ undefinedGlobalVar;  // Warning: variable may be undefined
 $undefinedLocalVar;  // Warning: variable may be undefined
 anotherUndefinedVar;  // Warning: variable may be undefined
 
+// Invalid string declaration - should show ERROR (red squiggles)
+$invalidStringTest = 'single quotes not supported'; // Error: single quotes not supported
+addalert('invalid string'); // Error: single quotes not supported
+
 // Valid examples (no errors/warnings)
 definedGlobal = 10;
 definedGlobal;  // This should NOT show a warning since it's defined above
@@ -166,4 +177,3 @@ employee.home3;  // No warning - default field
 employee.department;  // No warning - default field
 employee.location;  // No warning - default field
 employee.payrate0;  // No warning - default field
-*/

@@ -23,9 +23,19 @@ for (let i = 1; i <= 9; i++) {
     });
 }
 
-const reportingPropsMap = new Map<string, { detail: string; documentation: string }>();
+interface MemberOverload {
+    signature: string;
+    detail: string;
+    documentation: string;
+}
+
+const reportingPropsMap = new Map<string, { detail: string; documentation: string; overloads?: MemberOverload[] }>();
 reportingDateProperties.forEach(p => {
-    reportingPropsMap.set(p.name.toLowerCase(), { detail: p.detail, documentation: p.documentation });
+    reportingPropsMap.set(p.name.toLowerCase(), {
+        detail: p.detail,
+        documentation: p.documentation,
+        overloads: (p as any).overloads
+    });
 });
 
 interface FunctionOverload {
@@ -40,6 +50,78 @@ interface FunctionWithOverloads {
     detail: string;
     documentation: string;
     overloads?: FunctionOverload[];
+}
+
+function detectFirstArgumentType(argsText: string): 'string' | 'number' | 'unknown' {
+    const text = argsText.trim();
+    if (!text) return 'unknown';
+
+    let inString = false;
+    let stringChar = '';
+    let depth = 0;
+    let firstArg = '';
+
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (!inString) {
+            if (ch === '"' || ch === "'") {
+                inString = true;
+                stringChar = ch;
+            } else if (ch === '(') {
+                depth++;
+            } else if (ch === ')') {
+                if (depth > 0) depth--;
+            } else if (ch === ',' && depth === 0) {
+                break;
+            }
+        } else if (ch === stringChar && text[i - 1] !== '\\') {
+            inString = false;
+        }
+        firstArg += ch;
+    }
+
+    const first = firstArg.trim();
+    if (!first) return 'unknown';
+    if (first.startsWith('"') || first.startsWith("'")) return 'string';
+    if (/^[-+]?\d+(\.\d+)?$/.test(first)) return 'number';
+    return 'unknown';
+}
+
+function getImmediateCallArgsFromLine(lineText: string, wordEndChar: number): string | null {
+    const afterWord = lineText.substring(wordEndChar);
+    const openMatch = afterWord.match(/^\s*\(/);
+    if (!openMatch) return null;
+
+    let depth = 0;
+    let inString = false;
+    let stringChar = '';
+    let args = '';
+
+    for (let i = openMatch[0].length - 1; i < afterWord.length; i++) {
+        const ch = afterWord[i];
+
+        if (!inString) {
+            if (ch === '"' || ch === "'") {
+                inString = true;
+                stringChar = ch;
+            } else if (ch === '(') {
+                depth++;
+                if (depth > 1) args += ch;
+                continue;
+            } else if (ch === ')') {
+                depth--;
+                if (depth === 0) return args;
+            }
+        } else if (ch === stringChar) {
+            inString = false;
+        }
+
+        if (depth >= 1 && !(depth === 1 && ch === '(')) {
+            args += ch;
+        }
+    }
+
+    return null;
 }
 
 const functionsMap = new Map<string, FunctionWithOverloads>();
@@ -110,8 +192,24 @@ export class SwipeclockHoverProvider implements vscode.HoverProvider {
             const prop = reportingPropsMap.get(word);
             if (prop) {
                 const md = new vscode.MarkdownString();
-                md.appendMarkdown(`**reportingdate.${word}** — \`${prop.detail}\`\n\n`);
-                md.appendText(prop.documentation);
+                const suffix = lineText.substring(wordRange.end.character);
+                const isFunctionCallContext = /^\s*\(/.test(suffix);
+
+                if (prop.overloads && prop.overloads.length > 0) {
+                    const selectedOverload = isFunctionCallContext
+                        ? (prop.overloads.find(overload => overload.signature.includes('(')) ?? prop.overloads[0])
+                        : (prop.overloads.find(overload => !overload.signature.includes('(')) ?? prop.overloads[0]);
+
+                    md.appendMarkdown(`**reportingdate.${word}** — \`${prop.detail}\`\n\n`);
+                    md.appendMarkdown(`*${selectedOverload.detail}*\n\n`);
+                    md.appendCodeblock(selectedOverload.signature, 'swipeclock');
+                    md.appendMarkdown('\n\n');
+                    md.appendText(selectedOverload.documentation);
+                } else {
+                    md.appendMarkdown(`**reportingdate.${word}** — \`${prop.detail}\`\n\n`);
+                    md.appendText(prop.documentation);
+                }
+
                 return new vscode.Hover(md, wordRange);
             }
         }
@@ -124,13 +222,26 @@ export class SwipeclockHoverProvider implements vscode.HoverProvider {
             
             // If function has overloads, show all of them
             if (fn.overloads && fn.overloads.length > 0) {
-                fn.overloads.forEach((overload, index) => {
-                    if (index > 0) md.appendMarkdown('\n---\n\n');
-                    md.appendMarkdown(`*${overload.detail}*\n\n`);
-                    md.appendCodeblock(overload.signature, 'swipeclock');
+                const argsText = getImmediateCallArgsFromLine(lineText, wordRange.end.character);
+                if (argsText !== null) {
+                    const firstArgType = detectFirstArgumentType(argsText);
+                    const selectedOverload = firstArgType === 'unknown'
+                        ? fn.overloads[0]
+                        : (fn.overloads.find(overload => overload.parameterTypes?.[0] === firstArgType) ?? fn.overloads[0]);
+
+                    md.appendMarkdown(`*${selectedOverload.detail}*\n\n`);
+                    md.appendCodeblock(selectedOverload.signature, 'swipeclock');
                     md.appendMarkdown('\n\n');
-                    md.appendMarkdown(overload.documentation);
-                });
+                    md.appendMarkdown(selectedOverload.documentation);
+                } else {
+                    fn.overloads.forEach((overload, index) => {
+                        if (index > 0) md.appendMarkdown('\n---\n\n');
+                        md.appendMarkdown(`*${overload.detail}*\n\n`);
+                        md.appendCodeblock(overload.signature, 'swipeclock');
+                        md.appendMarkdown('\n\n');
+                        md.appendMarkdown(overload.documentation);
+                    });
+                }
             } else {
                 // No overloads - show default signature
                 md.appendCodeblock(fn.signature, 'swipeclock');

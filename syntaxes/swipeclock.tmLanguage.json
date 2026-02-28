@@ -168,7 +168,7 @@
       "patterns": [
         {
           "name": "entity.name.function",
-          "match": "(?i)\\b(dateadd|dateserial|weekday|cdate|cdatetime|ctime|day|month|year|val|cint|cstr|abs|translate|within|left|right|mid|round|roundin|roundout|roundends|roundtoschedule|roundup|rounddown|addalert|unpay|touches|isedited|tomorrow|yesterday|overlaps|overlap|addentry|accrueup|accruedown|getbalance|setbalance)\\b"
+          "match": "(?i)\\b(dateadd|dateserial|weekday|cdate|cdatetime|ctime|day|month|year|val|isdate|cint|cstr|abs|translate|within|left|right|mid|round|roundin|roundout|roundends|roundtoschedule|roundup|rounddown|addalert|unpay|touches|isedited|tomorrow|yesterday|overlaps|overlap|addentry|accrueup|accruedown|isbucket|getbalance|setbalance)\\b"
         }
       ]
     },
@@ -180,7 +180,7 @@
         },
         {
           "name": "variable.other.readwrite",
-          "match": "(?i)\\b(payrate|isfirsttoday|islasttoday|hours|minutes|seconds|breakseconds|minutesout|minutestil|punchset|category|punchdate|intime|outtime|inismissing|outismissing|istimes|ishours|ispayonly|inisedited|outisedited|hourstopunch|hourstopunchot|linetonow|inip|outip)\\b"
+          "match": "(?i)\\b(payrate|isfirsttoday|islasttoday|amount|addlpay|hours|minutes|seconds|breakseconds|minutesout|minutestil|punchset|category|punchdate|intime|outtime|inismissing|outismissing|istimes|ishours|ispayonly|inisedited|outisedited|hourstopunch|hourstopunchot|linetonow|inip|outip)\\b"
         }
       ]
     },

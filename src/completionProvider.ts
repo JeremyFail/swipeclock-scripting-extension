@@ -6,9 +6,6 @@ import * as vscode from 'vscode';
  * When adding new employee, reportingdate, or global items, update:
  *
  * 1. EMPLOYEE PROPERTIES: Add to employeeProperties array below.
- *    - Diagnostics (invalid property errors) and completion/hover use this list.
- *    - For numbered fields (department1-9, location1-9, home1-9, payrate1-9) no change needed;
- *      they are generated from the 1-9 range.
  *
  * 2. REPORTINGDATE PROPERTIES: Add to reportingDateProperties array.
  *
@@ -45,11 +42,35 @@ export const employeeProperties = [
   { name: 'startdate', detail: 'date', documentation: 'Employee start date' },
   { name: 'enddate', detail: 'date', documentation: 'Employee end date' },
   { name: 'department', detail: 'string', documentation: 'Default department' },
+  { name: 'department1', detail: 'string', documentation: 'Department 1 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department2', detail: 'string', documentation: 'Department 2 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department3', detail: 'string', documentation: 'Department 3 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department4', detail: 'string', documentation: 'Department 4 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department5', detail: 'string', documentation: 'Department 5 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department6', detail: 'string', documentation: 'Department 6 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department7', detail: 'string', documentation: 'Department 7 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department8', detail: 'string', documentation: 'Department 8 (requires additional department fields to be enabled in account settings)' },
+  { name: 'department9', detail: 'string', documentation: 'Department 9 (requires additional department fields to be enabled in account settings)' },
   { name: 'location', detail: 'string', documentation: 'Default location' },
+  { name: 'location1', detail: 'string', documentation: 'Location 1 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location2', detail: 'string', documentation: 'Location 2 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location3', detail: 'string', documentation: 'Location 3 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location4', detail: 'string', documentation: 'Location 4 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location5', detail: 'string', documentation: 'Location 5 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location6', detail: 'string', documentation: 'Location 6 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location7', detail: 'string', documentation: 'Location 7 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location8', detail: 'string', documentation: 'Location 8 (requires additional location fields to be enabled in account settings)' },
+  { name: 'location9', detail: 'string', documentation: 'Location 9 (requires additional location fields to be enabled in account settings)' },
   { name: 'supervisor', detail: 'string', documentation: 'Employee supervisor' },
   { name: 'home1', detail: 'string', documentation: 'Home field 1' },
   { name: 'home2', detail: 'string', documentation: 'Home field 2' },
   { name: 'home3', detail: 'string', documentation: 'Home field 3' },
+  { name: 'home4', detail: 'string', documentation: 'Home field 4 (requires additional home fields to be enabled in account settings)' },
+  { name: 'home5', detail: 'string', documentation: 'Home field 5 (requires additional home fields to be enabled in account settings)' },
+  { name: 'home6', detail: 'string', documentation: 'Home field 6 (requires additional home fields to be enabled in account settings)' },
+  { name: 'home7', detail: 'string', documentation: 'Home field 7 (requires additional home fields to be enabled in account settings)' },
+  { name: 'home8', detail: 'string', documentation: 'Home field 8 (requires additional home fields to be enabled in account settings)' },
+  { name: 'home9', detail: 'string', documentation: 'Home field 9 (requires additional home fields to be enabled in account settings)' },
   { name: 'autolunchhours', detail: 'number', documentation: 'Auto lunch hours' },
   { name: 'lunchminutes', detail: 'number', documentation: 'Lunch minutes' },
   { name: 'accrualfactor', detail: 'number', documentation: 'Accrual factor' },
@@ -58,32 +79,120 @@ export const employeeProperties = [
   { name: 'payrate0', detail: 'number', documentation: 'Default pay rate' },
   { name: 'payrate1', detail: 'number', documentation: 'Pay rate 1' },
   { name: 'payrate2', detail: 'number', documentation: 'Pay rate 2' },
-  { name: 'position', detail: 'string', documentation: 'Employee position. WorkforceHub accounts only.' },
-  { name: 'exempt', detail: 'string', documentation: 'Employee exempt status: "yes", "no", or blank. WorkforceHub accounts only.' },
-  { name: 'lasthiredate', detail: 'date', documentation: 'Employee last hire date. WorkforceHub accounts only.' }
+  { name: 'payrate3', detail: 'number', documentation: 'Pay rate 3 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate4', detail: 'number', documentation: 'Pay rate 4 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate5', detail: 'number', documentation: 'Pay rate 5 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate6', detail: 'number', documentation: 'Pay rate 6 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate7', detail: 'number', documentation: 'Pay rate 7 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate8', detail: 'number', documentation: 'Pay rate 8 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'payrate9', detail: 'number', documentation: 'Pay rate 9 (requires additional payrate fields to be enabled in account settings)' },
+  { name: 'position', detail: 'string', documentation: 'Employee position. Available to WorkforceHub accounts only.' },
+  { name: 'exempt', detail: 'string', documentation: 'Employee exempt status: "yes", "no", or blank. Available to WorkforceHub accounts only.' },
+  { name: 'lasthiredate', detail: 'date', documentation: 'Employee last hire date. Available to WorkforceHub accounts only.' }
 ];
 
 // ReportingDate object properties
 export const reportingDateProperties = [
   { name: 'tomorrow', detail: 'date', documentation: 'Returns the date of the next day' },
   { name: 'yesterday', detail: 'date', documentation: 'Returns the date of the previous day' },
-  { name: 'date', detail: 'date', documentation: 'Returns the date of the timecard' },
-  { name: 'year', detail: 'number', documentation: 'Returns the year of the timecard' },
-  { name: 'month', detail: 'number', documentation: 'Returns the month of the timecard' },
-  { name: 'weekday', detail: 'string', documentation: 'Returns the weekday as a letter: MTWRFSU' },
+  { name: 'date', detail: 'date', documentation: 'Returns the date of the timecard line' },
+  { name: 'year', detail: 'number', documentation: 'Returns the year of the timecard line' },
+  { name: 'month', detail: 'number', documentation: 'Returns the month of the timecard line' },
+  { name: 'day', detail: 'number', documentation: 'Returns the day of the timecard line' },
+  { name: 'weekday', detail: 'string', documentation: 'Returns the weekday of the timecard line as a letter: MTWRFSU' },
   { name: 'todaysdate', detail: 'date', documentation: 'Returns the current date' },
   { name: 'isfirstdayofmonth', detail: 'boolean', documentation: 'Returns true on the first day of the month' },
   { name: 'islastdayofmonth', detail: 'boolean', documentation: 'Returns true on the last day of the month' },
   { name: 'payperiodstart', detail: 'date', documentation: 'Returns the date of the first day of the pay period' },
   { name: 'payperiodend', detail: 'date', documentation: 'Returns the date of the last day of the pay period' },
-  { name: 'isholiday', detail: 'boolean', documentation: 'Returns true if the date is a holiday' },
+  {
+    name: 'isholiday',
+    detail: 'boolean',
+    documentation: 'Property form: returns true if reportingdate.date is a holiday. Function form: reportingdate.isholiday(dateValue) checks a specific date (date string or date object).',
+    overloads: [
+      {
+        signature: 'reportingdate.isholiday',
+        detail: 'Property form',
+        documentation: 'Returns true if reportingdate.date is a holiday.'
+      },
+      {
+        signature: 'reportingdate.isholiday(dateValue)',
+        detail: 'Function form',
+        documentation: 'Checks whether the specified date value is a holiday. Accepts a date string or date object.'
+      }
+    ]
+  },
   { name: 'spread', detail: 'timespan', documentation: 'Returns the amount of time between first in punch and last out punch' },
-  { name: 'totalhours', detail: 'number', documentation: 'Hours in the day' },
-  { name: 'totalhoursot', detail: 'number', documentation: 'Hours in the day that are overtime eligible' },
+  {
+    name: 'totalhours',
+    detail: 'number',
+    documentation: 'Property form: hours in the day. Function form: reportingdate.totalhours("Category1|Category2") returns hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.totalhours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the day.'
+      },
+      {
+        signature: 'reportingdate.totalhours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
+  {
+    name: 'totalhoursot',
+    detail: 'number',
+    documentation: 'Property form: overtime-eligible hours in the day. Function form: reportingdate.totalhoursot("Category1|Category2") returns overtime-eligible hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.totalhoursot',
+        detail: 'Property form',
+        documentation: 'Returns overtime-eligible hours in the day.'
+      },
+      {
+        signature: 'reportingdate.totalhoursot(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns overtime-eligible hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
   { name: 'hourstodate', detail: 'number', documentation: 'Hours to date in the week' },
   { name: 'hourstodateot', detail: 'number', documentation: 'Hours to date in the week that are overtime eligible' },
-  { name: 'weekhours', detail: 'number', documentation: 'Hours in the week' },
-  { name: 'pphours', detail: 'number', documentation: 'Hours in the pay period' },
+  {
+    name: 'weekhours',
+    detail: 'number',
+    documentation: 'Property form: hours in the week. Function form: reportingdate.weekhours("Category1|Category2") returns weekly hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.weekhours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the week.'
+      },
+      {
+        signature: 'reportingdate.weekhours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns weekly hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
+  {
+    name: 'pphours',
+    detail: 'number',
+    documentation: 'Property form: hours in the pay period. Function form: reportingdate.pphours("Category1|Category2") returns pay-period hours only for specified punch categories.',
+    overloads: [
+      {
+        signature: 'reportingdate.pphours',
+        detail: 'Property form',
+        documentation: 'Returns total hours in the pay period.'
+      },
+      {
+        signature: 'reportingdate.pphours(categoryList)',
+        detail: 'Function form',
+        documentation: 'Returns pay-period hours only for specified punch categories. Use the pipe delimiter for multiple categories, e.g. "Regular|Vacation".'
+      }
+    ]
+  },
   { name: 'islastpunchpp', detail: 'boolean', documentation: 'Last punch date of the pay period' },
   { name: 'islastpunchweek', detail: 'boolean', documentation: 'Last punch date of the week' },
   { name: 'totalweek', detail: 'function', documentation: 'Returns amounts in numeric prompts and dollar amounts in the work week. Requires argument: reportingdate.totalweek("<promptFieldName>")' },
@@ -96,6 +205,7 @@ export const reportingDateProperties = [
   { name: 'schedin', detail: 'function', documentation: 'Returns the in time of a scheduled line. Optional argument: reportingdate.schedin(<punchset>)' },
   { name: 'schedout', detail: 'function', documentation: 'Returns the out time of a scheduled line. Optional argument: reportingdate.schedout(<punchset>)' },
   { name: 'schedplace', detail: 'function', documentation: 'Returns the place of a scheduled line. Optional argument: reportingdate.schedplace(<punchset>)' },
+  { name: 'workweekstart', detail: 'date', documentation: 'Returns the date of the last day of the work week' },
   { name: 'workweekend', detail: 'date', documentation: 'Returns the date of the last day of the work week' }
 ];
 
@@ -111,6 +221,7 @@ export const globalFunctions = [
   { name: 'month', signature: 'month(date)', detail: 'Returns the month of the date object', documentation: 'Returns the month number' },
   { name: 'year', signature: 'year(date)', detail: 'Returns the year of the date object', documentation: 'Returns the year number' },
   { name: 'val', signature: 'val(string)', detail: 'Converts a string into a number', documentation: 'val("5.555") returns 5.555. Null values return 0.' },
+  { name: 'isdate', signature: 'isdate(value)', detail: 'Returns true if the specified value is a valid date', documentation: 'Accepts one parameter (string or date object) and returns true or false.' },
   { name: 'cint', signature: 'cint(value)', detail: 'Returns an integer', documentation: 'cint("5.555") returns 5. Null values throw an error.' },
   { name: 'cstr', signature: 'cstr(value)', detail: 'Returns a string', documentation: 'cstr(5.555) returns "5.555"' },
   { name: 'abs', signature: 'abs(number)', detail: 'Returns a positive number', documentation: 'abs(-5) returns 5' },
@@ -156,6 +267,7 @@ export const globalFunctions = [
   { name: 'addentry', signature: 'addentry("type", amount, "category")', detail: 'Adds a new entry on time card', documentation: 'addentry("hours", 8, "Regular") - all three parameters required' },
   { name: 'accrueup', signature: 'accrueup("Bucket", amount, max, vestDate, expDate)', detail: 'Accrues up hours in bucket', documentation: 'accrueup("PTO", 4, 160) - first two required, others optional' },
   { name: 'accruedown', signature: 'accruedown("Bucket", amount, min)', detail: 'Accrues down hours in bucket', documentation: 'accruedown("PTO", hours) - first two required, last optional' },
+  { name: 'isbucket', signature: 'isbucket("Bucket")', detail: 'Checks whether the value is an accrual bucket', documentation: 'Accepts one string parameter and returns true if the value is a valid accrual bucket for accrual scripting.' },
   { name: 'getbalance', signature: 'getbalance("Bucket")', detail: 'Returns hours in bucket', documentation: 'getbalance("Vacation") returns number of hours' },
   { name: 'setbalance', signature: 'setbalance("Bucket", value)', detail: 'Sets balance of bucket', documentation: 'setbalance("Vacation", 0) sets balance to 0' }
 ];
@@ -165,6 +277,8 @@ export const globalProperties = [
   { name: 'payrate', detail: 'number', documentation: 'Pay rate on the timecard (can be changed)' },
   { name: 'isfirsttoday', detail: 'boolean', documentation: 'Returns true if punchset is the first of the day' },
   { name: 'islasttoday', detail: 'boolean', documentation: 'Returns true if punchset is the last of the day' },
+  { name: 'amount', detail: 'number', documentation: 'Dollar amount of the punch set (can be changed) - TIP: when changing the amount, set the addlpay as well so the timecard subtotals are correct' },
+  { name: 'addlpay', detail: 'number', documentation: 'Additional pay amount of the punch set (can be changed) - this value is used for the dollar amount subtotals on the timecard. If you change the amount with a script, the additional pay may not be reflected and you will want to set this value as well.' },
   { name: 'hours', detail: 'number', documentation: 'Hours in a single punch set (can be changed)' },
   { name: 'minutes', detail: 'number', documentation: 'Minutes in a single punch set' },
   { name: 'seconds', detail: 'number', documentation: 'Seconds in a single punch set' },
@@ -173,7 +287,7 @@ export const globalProperties = [
   { name: 'minutestil', detail: 'number', documentation: 'Time elapsed between current out to next in' },
   { name: 'punchset', detail: 'number', documentation: 'Index number of punch set during the day' },
   { name: 'category', detail: 'string', documentation: 'Pay category of the punch (can be changed)' },
-  { name: 'punchdate', detail: 'date', documentation: 'Date of the punch set' },
+  { name: 'punchdate', detail: 'date', documentation: 'Date of the punch set - not to be confused with the timecard line reportingdate.date (it may not be the same, particularly for overnight punches or punches affected by yesterday or tomorrow rules)' },
   { name: 'intime', detail: 'time', documentation: 'In time of a punch set' },
   { name: 'outtime', detail: 'time', documentation: 'Out time of a punch set' },
   { name: 'inismissing', detail: 'boolean', documentation: 'Returns true if in time is missing' },
@@ -196,14 +310,14 @@ const reservedVariableNames = new Set([
   'if', 'else', 'and', 'or', 'true', 'false', 'mod',
   'contains', 'startswith', 'endswith',
   'dateadd', 'dateserial', 'weekday', 'cdate', 'cdatetime', 'ctime',
-  'day', 'month', 'year', 'val', 'cint', 'cstr', 'abs',
+  'day', 'month', 'year', 'val', 'isdate', 'cint', 'cstr', 'abs',
   'translate', 'within', 'left', 'right', 'mid',
   'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
   'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
   'overlaps', 'overlap', 'addentry',
-  'accrueup', 'accruedown', 'getbalance', 'setbalance',
+  'accrueup', 'accruedown', 'isbucket', 'getbalance', 'setbalance',
   'employee', 'reportingdate',
-  'payrate', 'isfirsttoday', 'islasttoday', 'hours', 'minutes', 'seconds',
+  'payrate', 'isfirsttoday', 'islasttoday', 'amount', 'addlpay', 'hours', 'minutes', 'seconds',
   'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',
   'punchdate', 'intime', 'outtime', 'inismissing', 'outismissing',
   'istimes', 'ishours', 'ispayonly', 'inisedited', 'outisedited',
@@ -294,48 +408,49 @@ export class SwipeclockCompletionProvider implements vscode.CompletionItemProvid
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     const linePrefix = document.lineAt(position).text.substr(0, position.character);
     const items: vscode.CompletionItem[] = [];
+    const autoInsertObjectPeriod = vscode.workspace.getConfiguration('swipeclock').get<boolean>('completion.autoInsertObjectPeriod', true);
 
-    // Check if we're completing after "employee." (case-insensitive)
-    if (linePrefix.match(/employee\.$/i)) {
+    const employeeMemberMatch = linePrefix.match(/employee\.([a-zA-Z0-9_]*)$/i);
+    const reportingDateMemberMatch = linePrefix.match(/reportingdate\.([a-zA-Z0-9_]*)$/i);
+
+    // Check if we're completing after "employee." (case-insensitive), including partial member typing
+    if (employeeMemberMatch) {
+      const typedMember = employeeMemberMatch[1] ?? '';
+      const replaceRange = new vscode.Range(
+        position.line,
+        position.character - typedMember.length,
+        position.line,
+        position.character
+      );
       employeeProperties.forEach(prop => {
         const item = new vscode.CompletionItem(prop.name, vscode.CompletionItemKind.Property);
         item.detail = prop.detail;
         item.documentation = new vscode.MarkdownString(prop.documentation);
         item.insertText = prop.name;
+        item.range = replaceRange;
         // Enable case-insensitive filtering
         item.filterText = prop.name.toLowerCase();
         items.push(item);
       });
       
-      // Add dynamic properties (department1-9, location1-9, etc.)
-      for (let i = 1; i <= 9; i++) {
-        const deptItem = new vscode.CompletionItem(`department${i}`, vscode.CompletionItemKind.Property);
-        deptItem.filterText = `department${i}`.toLowerCase();
-        items.push(deptItem);
-        
-        const locItem = new vscode.CompletionItem(`location${i}`, vscode.CompletionItemKind.Property);
-        locItem.filterText = `location${i}`.toLowerCase();
-        items.push(locItem);
-        
-        const homeItem = new vscode.CompletionItem(`home${i}`, vscode.CompletionItemKind.Property);
-        homeItem.filterText = `home${i}`.toLowerCase();
-        items.push(homeItem);
-        
-        const payItem = new vscode.CompletionItem(`payrate${i}`, vscode.CompletionItemKind.Property);
-        payItem.filterText = `payrate${i}`.toLowerCase();
-        items.push(payItem);
-      }
-      
       return items;
     }
 
-    // Check if we're completing after "reportingdate." (case-insensitive)
-    if (linePrefix.match(/reportingdate\.$/i)) {
+    // Check if we're completing after "reportingdate." (case-insensitive), including partial member typing
+    if (reportingDateMemberMatch) {
+      const typedMember = reportingDateMemberMatch[1] ?? '';
+      const replaceRange = new vscode.Range(
+        position.line,
+        position.character - typedMember.length,
+        position.line,
+        position.character
+      );
       reportingDateProperties.forEach(prop => {
         const item = new vscode.CompletionItem(prop.name, vscode.CompletionItemKind.Property);
         item.detail = prop.detail;
         item.documentation = new vscode.MarkdownString(prop.documentation);
         item.insertText = prop.name;
+        item.range = replaceRange;
         // Enable case-insensitive filtering
         item.filterText = prop.name.toLowerCase();
         items.push(item);
@@ -432,14 +547,20 @@ export class SwipeclockCompletionProvider implements vscode.CompletionItemProvid
     const employeeItem = new vscode.CompletionItem('employee', vscode.CompletionItemKind.Class);
     employeeItem.detail = 'Global employee object';
     employeeItem.documentation = new vscode.MarkdownString('Access employee properties using employee.propertyName');
-    employeeItem.insertText = 'employee.';
+    employeeItem.insertText = autoInsertObjectPeriod ? 'employee.' : 'employee';
+    if (autoInsertObjectPeriod) {
+      employeeItem.command = { command: 'editor.action.triggerSuggest', title: 'Reopen suggestions' };
+    }
     employeeItem.filterText = 'employee';
     items.push(employeeItem);
 
     const reportingDateItem = new vscode.CompletionItem('reportingdate', vscode.CompletionItemKind.Class);
     reportingDateItem.detail = 'Global reportingdate object';
     reportingDateItem.documentation = new vscode.MarkdownString('Access reporting date properties using reportingdate.propertyName');
-    reportingDateItem.insertText = 'reportingdate.';
+    reportingDateItem.insertText = autoInsertObjectPeriod ? 'reportingdate.' : 'reportingdate';
+    if (autoInsertObjectPeriod) {
+      reportingDateItem.command = { command: 'editor.action.triggerSuggest', title: 'Reopen suggestions' };
+    }
     reportingDateItem.filterText = 'reportingdate';
     items.push(reportingDateItem);
 

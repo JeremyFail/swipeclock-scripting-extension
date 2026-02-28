@@ -7,6 +7,7 @@ import { SwipeclockDiagnosticsProvider } from './diagnosticsProvider';
 import { SwipeclockHoverProvider } from './hoverProvider';
 import { SwipeclockSignatureHelpProvider } from './signatureHelpProvider';
 import { SwipeclockDocumentFormatter } from './documentFormatter';
+import { SwipeclockCodeActionProvider } from './codeActionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Swipeclock Scripting extension is now active');
@@ -48,6 +49,15 @@ export function activate(context: vscode.ExtensionContext) {
         new SwipeclockDocumentFormatter()
     );
 
+    // Register code actions (quick fixes for diagnostics)
+    const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+        'swipeclock',
+        new SwipeclockCodeActionProvider(),
+        {
+            providedCodeActionKinds: SwipeclockCodeActionProvider.providedCodeActionKinds
+        }
+    );
+
     // Register diagnostics provider for undefined variable warnings
     const diagnosticsProvider = new SwipeclockDiagnosticsProvider();
     const updateDiagnostics = (document: vscode.TextDocument) => {
@@ -59,6 +69,11 @@ export function activate(context: vscode.ExtensionContext) {
     // Update diagnostics on document change
     vscode.workspace.onDidChangeTextDocument(e => updateDiagnostics(e.document), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(updateDiagnostics, null, context.subscriptions);
+    vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('swipeclock.warnExtendedFields')) {
+            vscode.workspace.textDocuments.forEach(updateDiagnostics);
+        }
+    }, null, context.subscriptions);
     
     // Update diagnostics for all open documents
     vscode.workspace.textDocuments.forEach(updateDiagnostics);
@@ -173,6 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
         hoverProvider,
         signatureHelpProvider,
         documentFormatter,
+        codeActionProvider,
         diagnosticsProvider,
         setupCursorRulesCommand,
         setupCopilotInstructionsCommand,

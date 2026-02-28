@@ -164,10 +164,9 @@ export class SwipeclockSignatureHelpProvider implements vscode.SignatureHelpProv
 
                     const signatures = memberSignatures.map(sigInfo => {
                         const paramNames = parseParametersFromSignature(sigInfo.signature);
-                        const parameters: vscode.ParameterInformation[] = paramNames.map(name => ({
-                            label: name,
-                            documentation: new vscode.MarkdownString(sigInfo.documentation)
-                        }));
+                        const parameters: vscode.ParameterInformation[] = paramNames.map(
+                            name => new vscode.ParameterInformation(name)
+                        );
 
                         const sig = new vscode.SignatureInformation(
                             sigInfo.signature,
@@ -229,10 +228,9 @@ export class SwipeclockSignatureHelpProvider implements vscode.SignatureHelpProv
             let activeSignatureIndex = 0;
             fn.overloads.forEach((overload, index) => {
                 const paramNames = parseParametersFromSignature(overload.signature);
-                const parameters: vscode.ParameterInformation[] = paramNames.map(name => ({
-                    label: name,
-                    documentation: new vscode.MarkdownString(overload.documentation)
-                }));
+                const parameters: vscode.ParameterInformation[] = paramNames.map(
+                    name => new vscode.ParameterInformation(name)
+                );
                 
                 const sig = new vscode.SignatureInformation(
                     overload.signature,
@@ -261,10 +259,9 @@ export class SwipeclockSignatureHelpProvider implements vscode.SignatureHelpProv
         } else {
             // No overloads - use default signature
             const paramNames = parseParametersFromSignature(fn.signature);
-            const parameters: vscode.ParameterInformation[] = paramNames.map(name => ({
-                label: name,
-                documentation: new vscode.MarkdownString(fn.documentation)
-            }));
+            const parameters: vscode.ParameterInformation[] = paramNames.map(
+                name => new vscode.ParameterInformation(name)
+            );
 
             const sig = new vscode.SignatureInformation(fn.signature, new vscode.MarkdownString(fn.documentation));
             sig.parameters = parameters;

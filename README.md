@@ -28,7 +28,6 @@ For documentation on how to write scripts, check the [Swipeclock Knowledge Base]
   - Object-based completions for `employee.*` and `reportingdate.*`
   - All global functions with signatures and documentation
   - Global timecard properties
-  - Dynamic properties (department1-9, location1-9, home1-9, payrate1-9)
   - Operators and keywords
   - Completion suggestions for local and global variables defined in the script
 
@@ -48,7 +47,7 @@ For documentation on how to write scripts, check the [Swipeclock Knowledge Base]
 ## Installation
 
 1. Install the extension into VS Code.
-2. Open a `.scscript`, `.swipeclock`, or other supported file
+2. Open a `.scscript`, `.swipeclock`, or other supported file (see full list below)
 3. The extension should automatically activate
 
 Alternatively, to package and install manually:
@@ -112,18 +111,18 @@ All employee properties are available via `employee.*`:
 - `employee.firstname`, `employee.lastname`, `employee.code`
 - `employee.department`, `employee.location`, `employee.supervisor`
 - `employee.payrate0`, `employee.payrate1`, etc.
-- Dynamic properties: `employee.department1-9`, `employee.location1-9`, `employee.home1-9`, `employee.payrate1-9`
 - WorkforceHub only: `employee.position`, `employee.exempt`, `employee.lasthiredate`
 
 ### ReportingDate Object Properties
 All reporting date properties are available via `reportingdate.*`:
-- `reportingdate.date`, `reportingdate.year`, `reportingdate.month`
+- `reportingdate.date`, `reportingdate.day`, `reportingdate.year`, `reportingdate.month`
 - `reportingdate.totalhours`, `reportingdate.weekhours`
+- `reportingdate.workweekstart`, `reportingdate.workweekend`
 - `reportingdate.totalweek()`, `reportingdate.totalpp()`, etc.
 
 ### Global Functions
 - **Date Functions**: `dateadd()`, `dateserial()`, `weekday()`, `cdate()`, `cdatetime()`, `ctime()`, `day()`, `month()`, `year()`
-- **Number Functions**: `val()`, `cint()`, `cstr()`, `abs()`
+- **Number Functions**: `val()`, `isdate()`, `cint()`, `cstr()`, `abs()`
 - **String Functions**: `translate()`, `within()`, `left()`, `right()`, `mid()`
 - **Time Rounding**: `round()`, `roundin()`, `roundout()`, `roundends()`, `roundtoschedule()`
 - **Math Rounding**: `roundup()`, `rounddown()`
@@ -151,14 +150,26 @@ These properties are global (no object prefix):
 
 ## Configuration
 
+The extension offers a few built-in settings that you can use to configure your experience while writing scripts.
+
 ### Formatting Settings
 
-- **`swipeclock.formatting.indentSize`** (number, default: 4): Number of spaces for indentation when using spaces. Used as fallback when VS Code editor settings aren't available.
+These are settings that apply to the auto-formatter.
+
+- **`swipeclock.formatting.indentSize`** (number, default: 4): Number of spaces for indentation when using spaces. Note that this is only used as fallback when the VS Code editor settings aren't available - your main VS Code settings should be honored if configured.
 - **`swipeclock.formatting.braceStyle`** (string, default: `"javascript"`): Brace style - `"javascript"` (opening brace on same line as if/else) or `"allman"` (opening brace on new line).
+
+### IntelliSense Settings
+
+These are settings that apply to auto-completion and suggestions.
+
+- **`swipeclock.completion.autoInsertObjectPeriod`** (boolean, default: `true`): When enabled, selecting `employee` or `reportingdate` from IntelliSense inserts a trailing `.` and immediately reopens member suggestions. Set to `false` to insert only the object name.
 
 ### Diagnostics Settings
 
-- **`swipeclock.warnExtendedFields`** (boolean, default: `true`): Show warnings for extended fields (home4-9, department1-9, location1-9, payrate1-9) that require account settings to be enabled.
+These are settings that apply to warnings that may appear when writing scripts.
+
+- **`swipeclock.warnExtendedFields`** (boolean, default: `true`): Show warnings for extended fields (home4-9, department1-9, location1-9, payrate1-9) that require specific account settings to be enabled.
 
 ## AI Support (Cursor & GitHub Copilot)
 
@@ -206,12 +217,17 @@ When adding new scripting properties or functions, update these places:
 | **Global timecard property** | `src/completionProvider.ts` → `globalProperties` array |
 | **Reserved word** (so it isn't flagged as undefined variable) | `src/diagnosticsProvider.ts` → `reservedWords` set |
 
-Completion, hover docs, and diagnostics all read from the completion provider. Numbered fields (department1–9, location1–9, home1–9, payrate1–9) are generated automatically; no change needed for those. Optional: update `src/semanticTokensProvider.ts` for highlighting and `syntaxes/swipeclock.tmLanguage.json` for grammar.
+Completion, hover docs, and diagnostics all read from the completion provider. All fields are listed in `employeeProperties`; update that array when adding/removing fields. Optional: update `src/semanticTokensProvider.ts` for highlighting and `syntaxes/swipeclock.tmLanguage.json` for grammar.
 
-## Known Limitations
+## Known Issues
 
-- Dynamic properties (department1-9, etc.) are suggested but actual availability depends on account configuration
-- Some edge cases in syntax highlighting may not be perfect due to the flexible nature of the language
+- Some edge cases in syntax highlighting may not be perfect due to the flexible nature of the language.
+- In some files, clicking **View Problem** from a warning hover may jump to a later error (red squiggle) instead of opening the hovered warning. This behavior comes from VS Code's internal marker navigation ordering.
+  - Workaround: set VS Code's global problem sort order to position-based sorting:
+    ```json
+    "problems.sortOrder": "position"
+    ```
+  - Note: this setting is global (user/workspace), not language-specific.
 
 If you find issues or have suggestions, please report them on the [GitHub repository](https://github.com/JeremyFail/swipeclock-scripting-extension).
 

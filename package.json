@@ -100,6 +100,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings for extended fields (home4-9, department1-9, location1-9, payrate1-9) that require account settings to be enabled"
+        },
+        "swipeclock.completion.autoInsertObjectPeriod": {
+          "type": "boolean",
+          "default": true,
+          "description": "When enabled, selecting 'employee' or 'reportingdate' from IntelliSense inserts a trailing period and reopens member suggestions."
         }
       }
     },

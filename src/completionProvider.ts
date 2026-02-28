@@ -327,48 +327,49 @@ export class SwipeclockCompletionProvider implements vscode.CompletionItemProvid
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     const linePrefix = document.lineAt(position).text.substr(0, position.character);
     const items: vscode.CompletionItem[] = [];
+    const autoInsertObjectPeriod = vscode.workspace.getConfiguration('swipeclock').get<boolean>('completion.autoInsertObjectPeriod', true);
 
-    // Check if we're completing after "employee." (case-insensitive)
-    if (linePrefix.match(/employee\.$/i)) {
+    const employeeMemberMatch = linePrefix.match(/employee\.([a-zA-Z0-9_]*)$/i);
+    const reportingDateMemberMatch = linePrefix.match(/reportingdate\.([a-zA-Z0-9_]*)$/i);
+
+    // Check if we're completing after "employee." (case-insensitive), including partial member typing
+    if (employeeMemberMatch) {
+      const typedMember = employeeMemberMatch[1] ?? '';
+      const replaceRange = new vscode.Range(
+        position.line,
+        position.character - typedMember.length,
+        position.line,
+        position.character
+      );
       employeeProperties.forEach(prop => {
         const item = new vscode.CompletionItem(prop.name, vscode.CompletionItemKind.Property);
         item.detail = prop.detail;
         item.documentation = new vscode.MarkdownString(prop.documentation);
         item.insertText = prop.name;
+        item.range = replaceRange;
         // Enable case-insensitive filtering
         item.filterText = prop.name.toLowerCase();
         items.push(item);
       });
       
-      // Add dynamic properties (department1-9, location1-9, etc.)
-      for (let i = 1; i <= 9; i++) {
-        const deptItem = new vscode.CompletionItem(`department${i}`, vscode.CompletionItemKind.Property);
-        deptItem.filterText = `department${i}`.toLowerCase();
-        items.push(deptItem);
-        
-        const locItem = new vscode.CompletionItem(`location${i}`, vscode.CompletionItemKind.Property);
-        locItem.filterText = `location${i}`.toLowerCase();
-        items.push(locItem);
-        
-        const homeItem = new vscode.CompletionItem(`home${i}`, vscode.CompletionItemKind.Property);
-        homeItem.filterText = `home${i}`.toLowerCase();
-        items.push(homeItem);
-        
-        const payItem = new vscode.CompletionItem(`payrate${i}`, vscode.CompletionItemKind.Property);
-        payItem.filterText = `payrate${i}`.toLowerCase();
-        items.push(payItem);
-      }
-      
       return items;
     }
 
-    // Check if we're completing after "reportingdate." (case-insensitive)
-    if (linePrefix.match(/reportingdate\.$/i)) {
+    // Check if we're completing after "reportingdate." (case-insensitive), including partial member typing
+    if (reportingDateMemberMatch) {
+      const typedMember = reportingDateMemberMatch[1] ?? '';
+      const replaceRange = new vscode.Range(
+        position.line,
+        position.character - typedMember.length,
+        position.line,
+        position.character
+      );
       reportingDateProperties.forEach(prop => {
         const item = new vscode.CompletionItem(prop.name, vscode.CompletionItemKind.Property);
         item.detail = prop.detail;
         item.documentation = new vscode.MarkdownString(prop.documentation);
         item.insertText = prop.name;
+        item.range = replaceRange;
         // Enable case-insensitive filtering
         item.filterText = prop.name.toLowerCase();
         items.push(item);
@@ -465,14 +466,20 @@ export class SwipeclockCompletionProvider implements vscode.CompletionItemProvid
     const employeeItem = new vscode.CompletionItem('employee', vscode.CompletionItemKind.Class);
     employeeItem.detail = 'Global employee object';
     employeeItem.documentation = new vscode.MarkdownString('Access employee properties using employee.propertyName');
-    employeeItem.insertText = 'employee.';
+    employeeItem.insertText = autoInsertObjectPeriod ? 'employee.' : 'employee';
+    if (autoInsertObjectPeriod) {
+      employeeItem.command = { command: 'editor.action.triggerSuggest', title: 'Reopen suggestions' };
+    }
     employeeItem.filterText = 'employee';
     items.push(employeeItem);
 
     const reportingDateItem = new vscode.CompletionItem('reportingdate', vscode.CompletionItemKind.Class);
     reportingDateItem.detail = 'Global reportingdate object';
     reportingDateItem.documentation = new vscode.MarkdownString('Access reporting date properties using reportingdate.propertyName');
-    reportingDateItem.insertText = 'reportingdate.';
+    reportingDateItem.insertText = autoInsertObjectPeriod ? 'reportingdate.' : 'reportingdate';
+    if (autoInsertObjectPeriod) {
+      reportingDateItem.command = { command: 'editor.action.triggerSuggest', title: 'Reopen suggestions' };
+    }
     reportingDateItem.filterText = 'reportingdate';
     items.push(reportingDateItem);
 

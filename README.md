@@ -127,7 +127,7 @@ All reporting date properties are available via `reportingdate.*`:
 - **Time Rounding**: `round()`, `roundin()`, `roundout()`, `roundends()`, `roundtoschedule()`
 - **Math Rounding**: `roundup()`, `rounddown()`
 - **Additional**: `addalert()`, `unpay()`, `touches()`, `isedited()`, `tomorrow()`, `yesterday()`, `overlaps()`, `overlap()`, `addentry()`
-- **Accrual**: `accrueup()`, `accruedown()`, `getbalance()`, `setbalance()`
+- **Accrual**: `accrueup()`, `accruedown()`, `isbucket()`, `getbalance()`, `setbalance()`
 
 ### Global Timecard Properties
 These properties are global (no object prefix):

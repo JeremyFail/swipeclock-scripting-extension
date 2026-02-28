@@ -267,6 +267,7 @@ export const globalFunctions = [
   { name: 'addentry', signature: 'addentry("type", amount, "category")', detail: 'Adds a new entry on time card', documentation: 'addentry("hours", 8, "Regular") - all three parameters required' },
   { name: 'accrueup', signature: 'accrueup("Bucket", amount, max, vestDate, expDate)', detail: 'Accrues up hours in bucket', documentation: 'accrueup("PTO", 4, 160) - first two required, others optional' },
   { name: 'accruedown', signature: 'accruedown("Bucket", amount, min)', detail: 'Accrues down hours in bucket', documentation: 'accruedown("PTO", hours) - first two required, last optional' },
+  { name: 'isbucket', signature: 'isbucket("Bucket")', detail: 'Checks whether the value is an accrual bucket', documentation: 'Accepts one string parameter and returns true if the value is a valid accrual bucket for accrual scripting.' },
   { name: 'getbalance', signature: 'getbalance("Bucket")', detail: 'Returns hours in bucket', documentation: 'getbalance("Vacation") returns number of hours' },
   { name: 'setbalance', signature: 'setbalance("Bucket", value)', detail: 'Sets balance of bucket', documentation: 'setbalance("Vacation", 0) sets balance to 0' }
 ];
@@ -314,7 +315,7 @@ const reservedVariableNames = new Set([
   'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
   'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
   'overlaps', 'overlap', 'addentry',
-  'accrueup', 'accruedown', 'getbalance', 'setbalance',
+  'accrueup', 'accruedown', 'isbucket', 'getbalance', 'setbalance',
   'employee', 'reportingdate',
   'payrate', 'isfirsttoday', 'islasttoday', 'amount', 'addlpay', 'hours', 'minutes', 'seconds',
   'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',

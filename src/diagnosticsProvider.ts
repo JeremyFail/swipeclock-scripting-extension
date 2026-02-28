@@ -28,7 +28,7 @@ const reservedWords = new Set([
     'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
     'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
     'overlaps', 'overlap', 'addentry',
-    'accrueup', 'accruedown', 'getbalance', 'setbalance',
+    'accrueup', 'accruedown', 'isbucket', 'getbalance', 'setbalance',
     'employee', 'reportingdate',
     'payrate', 'isfirsttoday', 'islasttoday', 'hours', 'minutes', 'seconds',
     'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',

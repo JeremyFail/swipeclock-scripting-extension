@@ -180,7 +180,7 @@
         },
         {
           "name": "variable.other.readwrite",
-          "match": "(?i)\\b(payrate|isfirsttoday|islasttoday|hours|minutes|seconds|breakseconds|minutesout|minutestil|punchset|category|punchdate|intime|outtime|inismissing|outismissing|istimes|ishours|ispayonly|inisedited|outisedited|hourstopunch|hourstopunchot|linetonow|inip|outip)\\b"
+          "match": "(?i)\\b(payrate|isfirsttoday|islasttoday|amount|addlpay|hours|minutes|seconds|breakseconds|minutesout|minutestil|punchset|category|punchdate|intime|outtime|inismissing|outismissing|istimes|ishours|ispayonly|inisedited|outisedited|hourstopunch|hourstopunchot|linetonow|inip|outip)\\b"
         }
       ]
     },

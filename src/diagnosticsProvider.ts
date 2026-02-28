@@ -9,14 +9,6 @@ const validReportingDateProperties = new Set(
     reportingDateProperties.map(p => p.name.toLowerCase())
 );
 
-// Add dynamic properties (department1-9, location1-9, etc.) to valid sets
-for (let i = 1; i <= 9; i++) {
-    validEmployeeProperties.add(`department${i}`);
-    validEmployeeProperties.add(`location${i}`);
-    validEmployeeProperties.add(`home${i}`);
-    validEmployeeProperties.add(`payrate${i}`);
-}
-
 // Create set of valid function names (case-insensitive)
 const validFunctions = new Set(
     globalFunctions.map(f => f.name.toLowerCase())
@@ -31,7 +23,7 @@ const reservedWords = new Set([
     'if', 'else', 'and', 'or', 'true', 'false', 'mod',
     'contains', 'startswith', 'endswith',
     'dateadd', 'dateserial', 'weekday', 'cdate', 'cdatetime', 'ctime',
-    'day', 'month', 'year', 'val', 'cint', 'cstr', 'abs',
+    'day', 'month', 'year', 'val', 'isdate', 'cint', 'cstr', 'abs',
     'translate', 'within', 'left', 'right', 'mid',
     'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
     'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',

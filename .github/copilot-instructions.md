@@ -42,12 +42,12 @@ These functions are global and do NOT use object notation:
 - **String functions**: `translate(field, list1, list2)`, `within(field, list)`, `left(string, count)`, `right(string, count)`, `mid(string, start, count)`
 - **Time rounding**: `round(timeString)` or `round(number)`, `roundin(timeString)`, `roundout(timeString)`, `roundends(timeString)`, `roundtoschedule(a1, a2, b1, b2)`
 - **Math rounding**: `roundup(number)`, `rounddown(number)` (NOT for time rounding)
-- **Additional**: `addalert(message)`, `unpay(hours)`, `touches(startTime, endTime)`, `isedited(property)`, `tomorrow(0)`, `yesterday(0)`, `overlaps(startTime, endTime)`, `overlap(start1, end1, start2, end2)`, `addentry("type", amount, "category")`
+- **Additional**: `addalert(message)`, `unpay(hours)`, `touches(startTime, endTime)`, `isedited(property)`, `tomorrow(0)`, `yesterday(0)`, `overlaps(startTime, endTime)`, `overlap(start1, end1, start2, end2)`, `addentry("type", amount, "category")`, `otrules("OT Rule Name")`
 - **Accrual**: `accrueup("Bucket", amount, max, vestDate, expDate)`, `accruedown("Bucket", amount, min)`, `getbalance("Bucket")`, `setbalance("Bucket", value)`
 
 ### Global Timecard Properties (NOT object-based)
 These properties are global and do NOT use object notation:
-- `payrate`, `isfirsttoday`, `islasttoday`, `hours`, `minutes`, `seconds`, `breakseconds`, `minutesout` or `minutesout(false)`, `minutestil`, `punchset`, `category`, `punchdate`, `intime`, `outtime`, `inismissing`, `outismissing`, `istimes`, `ishours`, `ispayonly`, `inisedited`, `outisedited`, `isedited`, `hourstopunch`, `hourstopunchot`, `linetonow`, `inip`, `outip`
+- `payrate`, `isfirsttoday`, `islasttoday`, `hours`, `minutes`, `seconds`, `breakseconds`, `minutesout` or `minutesout(false)`, `minutestil`, `punchset`, `category`, `otcategory`, `punchdate`, `intime`, `outtime`, `indt`, `outdt`, `inismissing`, `outismissing`, `inispresent`, `outispresent`, `istimes`, `ishours`, `ispayonly`, `inisedited`, `outisedited`, `isedited`, `hourstopunch`, `hourstopunchot`, `linetonow`, `inip`, `outip`
 
 ### Variables
 - **Local variables**: Start with `$` (e.g., `$myvar = 10`)

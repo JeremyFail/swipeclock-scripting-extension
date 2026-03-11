@@ -83,8 +83,8 @@ A **document formatter** is included. Use **Format Document** (e.g. `Alt+Shift+F
 
 - **Default style**: Uses VS Code's editor indentation settings (tab size, spaces vs tabs). Falls back to 4 spaces if not set. JavaScript-style braces (opening `{` on the same line as `if` / `else if` / `else`).
 - **Customization**: You can change formatter behavior in Settings:
-  - **Swipeclock Scripting: Indent Size** (`swipeclock.formatting.indentSize`) – number of spaces when using spaces (default: 4, used as fallback only).
-  - **Swipeclock Scripting: Brace Style** (`swipeclock.formatting.braceStyle`) – `javascript` (brace on same line - default) or `allman` (brace on new line).
+  - **Swipeclock Scripting: Indent Size** (`swipeclock.formatting.indentSize`) - number of spaces when using spaces (default: 4, used as fallback only).
+  - **Swipeclock Scripting: Brace Style** (`swipeclock.formatting.braceStyle`) - `javascript` (brace on same line - default) or `allman` (brace on new line).
 - The formatter respects your editor's **Insert Spaces** / **Tab Size** settings. You can also choose a different default formatter for Swipeclock files in VS Code settings if you prefer.
 
 ### Hover Documentation
@@ -92,7 +92,7 @@ A **document formatter** is included. Use **Format Document** (e.g. `Alt+Shift+F
 Hover over any symbol to see documentation:
 - **Functions**: See signature, description, and examples
 - **Object properties**: See type and description (e.g., `employee.department`, `reportingdate.totalhours`)
-- **Global properties**: See type and description (e.g., `hours`, `category`, `intime`)
+- **Global properties**: See type and description (e.g., `hours`, `category`, `otcategory`, `intime`)
 - **Operators**: See operator description and examples
 
 ### Signature Help
@@ -112,6 +112,7 @@ All employee properties are available via `employee.*`:
 - `employee.department`, `employee.location`, `employee.supervisor`
 - `employee.payrate0`, `employee.payrate1`, etc.
 - WorkforceHub only: `employee.position`, `employee.exempt`, `employee.lasthiredate`
+- Rule-required (warning when enabled): `employee.schedule` (RoundToSchedule), `employee.birthday` (Birthday), `employee.maxhours` (HoursAlert), `employee.jobtitlecode` / `employee.paytypecode` (PBJ), `employee.country` / `employee.state` (EmployeeCountryState), `employee.autolunchhours` / `employee.lunchminutes` (AutoLunch), `employee.accrualfactor` (AccrualFactor)
 
 ### ReportingDate Object Properties
 All reporting date properties are available via `reportingdate.*`:
@@ -132,8 +133,8 @@ All reporting date properties are available via `reportingdate.*`:
 ### Global Timecard Properties
 These properties are global (no object prefix):
 - `payrate`, `isfirsttoday`, `islasttoday`, `hours`, `minutes`, `seconds`, `breakseconds`
-- `minutesout`, `minutestil`, `punchset`, `category`, `punchdate`
-- `intime`, `outtime`, `inismissing`, `outismissing`
+- `minutesout`, `minutestil`, `punchset`, `category`, `otcategory`, `punchdate`
+- `intime`, `outtime`, `indt`, `outdt`, `inismissing`, `outismissing`, `inispresent`, `outispresent`
 - `istimes`, `ishours`, `ispayonly`, `inisedited`, `outisedited`, `isedited`
 - `hourstopunch`, `hourstopunchot`, `linetonow`, `inip`, `outip`
 

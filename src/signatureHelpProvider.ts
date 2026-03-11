@@ -217,10 +217,20 @@ export class SwipeclockSignatureHelpProvider implements vscode.SignatureHelpProv
             // Detect the type of the first argument
             const firstArgType = detectFirstArgumentType(argsSoFar);
             
-            // Find matching overload
+            // Find matching overload by first argument type
             if (firstArgType !== 'unknown') {
                 selectedOverload = fn.overloads.find(overload => 
                     overload.parameterTypes[0] === firstArgType
+                ) || null;
+            }
+            
+            // If still unknown (e.g. split with time arg), pick by argument count
+            if (!selectedOverload && argsSoFar.trim()) {
+                const argCount = argsSoFar.split(',').length;
+                selectedOverload = fn.overloads.find(overload => 
+                    overload.parameterTypes.length === argCount
+                ) || fn.overloads.find(overload => 
+                    overload.parameterTypes.length >= argCount
                 ) || null;
             }
             

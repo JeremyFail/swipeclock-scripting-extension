@@ -220,14 +220,24 @@ export class SwipeclockHoverProvider implements vscode.HoverProvider {
             const md = new vscode.MarkdownString();
             md.appendMarkdown(`**${word}**\n\n`);
             
-            // If function has overloads, show all of them
+            // If function has overloads, pick the one that matches usage (type or argument count)
             if (fn.overloads && fn.overloads.length > 0) {
                 const argsText = getImmediateCallArgsFromLine(lineText, wordRange.end.character);
                 if (argsText !== null) {
                     const firstArgType = detectFirstArgumentType(argsText);
-                    const selectedOverload = firstArgType === 'unknown'
-                        ? fn.overloads[0]
-                        : (fn.overloads.find(overload => overload.parameterTypes?.[0] === firstArgType) ?? fn.overloads[0]);
+                    let selectedOverload = firstArgType !== 'unknown'
+                        ? (fn.overloads.find(overload => overload.parameterTypes?.[0] === firstArgType) ?? fn.overloads[0])
+                        : null;
+                    // When first arg type is unknown (e.g. split with time), pick by argument count
+                    if (!selectedOverload && argsText.trim()) {
+                        const argCount = argsText.split(',').length;
+                        selectedOverload = fn.overloads.find(overload =>
+                            overload.parameterTypes && overload.parameterTypes.length === argCount
+                        ) ?? fn.overloads.find(overload =>
+                            overload.parameterTypes && overload.parameterTypes.length >= argCount
+                        ) ?? fn.overloads[0];
+                    }
+                    if (!selectedOverload) selectedOverload = fn.overloads[0];
 
                     md.appendMarkdown(`*${selectedOverload.detail}*\n\n`);
                     md.appendCodeblock(selectedOverload.signature, 'swipeclock');

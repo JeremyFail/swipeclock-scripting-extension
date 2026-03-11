@@ -18,21 +18,35 @@ const configureExtendedFieldsSettingUri = vscode.Uri.parse(
     `command:workbench.action.openSettings?${encodeURIComponent(JSON.stringify(['swipeclock.warnExtendedFields']))}`
 );
 
+// Employee properties that require a specific processing rule (warning when warnExtendedFields is on)
+const employeeRuleRequired: Record<string, string> = {
+    schedule: 'RoundToSchedule',
+    birthday: 'Birthday',
+    maxhours: 'HoursAlert',
+    jobtitlecode: 'Payroll-Based Journal (PBJ)',
+    paytypecode: 'Payroll-Based Journal (PBJ)',
+    country: 'EmployeeCountryState',
+    state: 'EmployeeCountryState',
+    autolunchhours: 'AutoLunch',
+    lunchminutes: 'AutoLunch',
+    accrualfactor: 'AccrualFactor'
+};
+
 // Reserved words that are not variables
 const reservedWords = new Set([
     'if', 'else', 'and', 'or', 'true', 'false', 'mod',
     'contains', 'startswith', 'endswith',
     'dateadd', 'dateserial', 'weekday', 'cdate', 'cdatetime', 'ctime',
     'day', 'month', 'year', 'val', 'isdate', 'cint', 'cstr', 'abs',
-    'translate', 'within', 'left', 'right', 'mid',
+    'translate', 'within', 'left', 'right', 'mid', 'len', 'split',
     'round', 'roundin', 'roundout', 'roundends', 'roundtoschedule', 'roundup', 'rounddown',
     'addalert', 'unpay', 'touches', 'isedited', 'tomorrow', 'yesterday',
     'overlaps', 'overlap', 'addentry',
-    'accrueup', 'accruedown', 'isbucket', 'getbalance', 'setbalance',
+    'accrueup', 'accruedown', 'isbucket', 'getbalance', 'setbalance', 'otrules',
     'employee', 'reportingdate',
-    'payrate', 'isfirsttoday', 'islasttoday', 'hours', 'minutes', 'seconds',
-    'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category',
-    'punchdate', 'intime', 'outtime', 'inismissing', 'outismissing',
+    'payrate', 'isfirsttoday', 'islasttoday', 'amount', 'addlpay', 'hours', 'minutes', 'seconds',
+    'breakseconds', 'minutesout', 'minutestil', 'punchset', 'category', 'otcategory',
+    'punchdate', 'intime', 'outtime', 'indt', 'outdt', 'inismissing', 'outismissing', 'inispresent', 'outispresent',
     'istimes', 'ishours', 'ispayonly', 'inisedited', 'outisedited',
     'hourstopunch', 'hourstopunchot', 'linetonow', 'inip', 'outip'
 ]);
@@ -247,6 +261,26 @@ export class SwipeclockDiagnosticsProvider {
                             vscode.DiagnosticSeverity.Error
                         );
                         
+                        diagnostics.push(diagnostic);
+                    } else if (objectName === 'employee' && warnExtendedFields && employeeRuleRequired[propertyName]) {
+                        // Valid but requires a processing rule - show configurable warning
+                        const ruleName = employeeRuleRequired[propertyName];
+                        const range = new vscode.Range(
+                            lineIndex,
+                            propertyStart,
+                            lineIndex,
+                            propertyStart + propertyName.length
+                        );
+                        const diagnostic = new vscode.Diagnostic(
+                            range,
+                            `employee.${propertyName} requires the "${ruleName}" processing rule to be enabled.`,
+                            vscode.DiagnosticSeverity.Warning
+                        );
+                        diagnostic.source = 'Configure warning';
+                        diagnostic.code = {
+                            value: 'swipeclock.extendedFieldWarning',
+                            target: configureExtendedFieldsSettingUri
+                        };
                         diagnostics.push(diagnostic);
                     }
                 }

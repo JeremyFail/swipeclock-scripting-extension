@@ -71,6 +71,9 @@ $isYesterdayHoliday = reportingdate.isholiday(reportingdate.date - 1);
 round("N15");
 round(5.555);
 
+split(12:00am);
+split(12:00am, true, false);
+
 // Global properties
 if (isfirsttoday) {
   addalert("First punch of the day");
@@ -136,6 +139,18 @@ employee.location9;  // Warning: requires additional location fields to be enabl
 employee.payrate1;  // Warning: requires additional payrate fields to be enabled
 employee.payrate5;  // Warning: requires additional payrate fields to be enabled
 employee.payrate9;  // Warning: requires additional payrate fields to be enabled
+
+// Requires an additional processing rule to be enabled
+employee.birthday;
+employee.schedule;
+employee.maxhours;
+employee.jobtitlecode;
+employee.paytypecode;
+employee.country;
+employee.state;
+employee.autolunchhours;
+employee.lunchminutes;
+employee.accrualfactor;
 
 // Beyond official limit - should show ERROR (red squiggles)
 employee.home10;  // Error: beyond the officially supported limit of 9
